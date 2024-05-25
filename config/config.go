@@ -15,11 +15,14 @@ type Configurations struct {
 	AppName      string
 	CacheAddress string
 	LogLevel     string
+	Environment  string
 }
 
 func GetConfig(filepath string) *Configurations {
 	err := godotenv.Load(filepath)
-	if err != nil {
+	environment := os.Getenv("ENVIRONMENT")
+
+	if err != nil && environment != "production" {
 		log.Fatal("Error loading .env file")
 	}
 
@@ -31,6 +34,7 @@ func GetConfig(filepath string) *Configurations {
 		CacheAddress: os.Getenv("REDIS_URL"),
 		LogLevel:     os.Getenv("LOG_LEVEL"),
 		AppName:      os.Getenv("APP_NAME"),
+		Environment:  environment,
 	}
 
 	return &configurations
