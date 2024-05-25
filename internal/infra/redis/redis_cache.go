@@ -17,9 +17,12 @@ type RedisCache struct {
 var ttl = time.Minute * 30
 
 func New(ctx context.Context, configurations *config.Configurations) (*RedisCache, error) {
-	client := redis.NewClient(&redis.Options{
-		Addr: configurations.CacheAddress,
-	})
+	opts, err := redis.ParseURL(configurations.CacheAddress)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to parse redis url: %v", err)
+	}
+
+	client := redis.NewClient(opts)
 	if err := client.Ping(ctx).Err(); err != nil {
 		return nil, err
 	}
