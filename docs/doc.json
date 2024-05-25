@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://server.onrender.com/",
+      "url": "https://caution-companion.onrender.com/",
       "description": "Production server (uses live data)"
     },
     {
