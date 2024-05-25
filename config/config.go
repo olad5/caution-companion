@@ -12,6 +12,7 @@ type Configurations struct {
 	DatabaseName string
 	Port         string
 	JwtSecretKey string
+	AppName      string
 	CacheAddress string
 	LogLevel     string
 }
@@ -29,6 +30,7 @@ func GetConfig(filepath string) *Configurations {
 		JwtSecretKey: os.Getenv("SECRET_KEY"),
 		CacheAddress: os.Getenv("REDIS_URL"),
 		LogLevel:     os.Getenv("LOG_LEVEL"),
+		AppName:      os.Getenv("APP_NAME"),
 	}
 
 	return &configurations

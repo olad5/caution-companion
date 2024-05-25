@@ -10,7 +10,8 @@ import (
 )
 
 type RedisCache struct {
-	Client *redis.Client
+	Client  *redis.Client
+	AppName *string
 }
 
 var ttl = time.Minute * 30
@@ -24,12 +25,13 @@ func New(ctx context.Context, configurations *config.Configurations) (*RedisCach
 	}
 
 	return &RedisCache{
-		Client: client,
+		Client:  client,
+		AppName: &configurations.AppName,
 	}, nil
 }
 
 func (r *RedisCache) SetOne(ctx context.Context, key, value string) error {
-	_, err := r.Client.Set(ctx, key, value, ttl).Result()
+	_, err := r.Client.Set(ctx, *r.AppName+key, value, ttl).Result()
 	if err != nil {
 		return fmt.Errorf("Error setting value in cache: %w", err)
 	}
