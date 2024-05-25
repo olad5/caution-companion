@@ -1,0 +1,356 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Server",
+    "description": "APIs for Server",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "https://server.onrender.com/",
+      "description": "Production server (uses live data)"
+    },
+    {
+      "url": "http://localhost:3500/",
+      "description": "Local Development server (uses test data)"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Returns the Health of the Server",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthCheckResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "status": false,
+                  "message": "server is down"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Creates a new User.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCurrentUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email Already Exists | Client Error | Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Login User In.",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserRequest"
+              },
+              "example": {
+                "email": "susanrice@gmail.com",
+                "password": "secret"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "refreshToken": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email Not Verified | Password Not Correct | Client Error | Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get Current User",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCurrentUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Client Error | Unauthorized Error | Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "User gave a bad request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "description": "JWT Authorization header using the Bearer scheme.",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "SuccessWithOnlyMessage": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean",
+            "default": true
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean",
+            "default": false
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "HealthCheckResponse": {
+        "title": "HealthCheckResponse",
+        "description": "",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": ["status", "message"],
+        "example": {
+          "status": true,
+          "message": "server is healthy"
+        }
+      },
+      "GetCurrentUserResponse": {
+        "title": "GetCurrentUserResponse",
+        "description": "",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "email": {
+                "type": "string",
+                "minLength": 1
+              },
+              "first_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "last_name": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["id", "email", "first_name", "last_name"]
+          }
+        },
+        "required": ["status", "message", "data"]
+      },
+      "RegisterUserRequest": {
+        "title": "RegisterUserRequest",
+        "required": ["email", "password", "first_name", "last_name"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "email": "susanrice@gmail.com",
+          "password": "secret",
+          "first_name": "susan",
+          "last_name": "rice"
+        }
+      },
+      "LoginUserRequest": {
+        "title": "LoginUserRequest",
+        "required": ["email", "password"],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "email": "susanrice@gmail.com",
+          "password": "secret"
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }]
+}

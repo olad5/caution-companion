@@ -1,0 +1,13 @@
+version: '3.6'
+services:
+  database:
+    container_name: go-hackathon-starter-mongo
+    image: mongo:4.4.20-rc0
+    ports:
+      - 20000:27017
+
+  redis:
+    container_name: go-hackathon-starter-redis
+    image: redis:6.2-alpine
+    ports:
+      - "6030:6379"
