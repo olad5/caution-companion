@@ -10,14 +10,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/olad5/go-hackathon-starter-template/config/data"
-	"github.com/olad5/go-hackathon-starter-template/internal/infra/postgres"
-	"github.com/olad5/go-hackathon-starter-template/internal/infra/redis"
-
-	"github.com/olad5/go-hackathon-starter-template/config"
-	loggingMiddleware "github.com/olad5/go-hackathon-starter-template/internal/handlers/logging"
-	"github.com/olad5/go-hackathon-starter-template/pkg/api"
-	"github.com/olad5/go-hackathon-starter-template/pkg/utils/logger"
+	"github.com/olad5/caution-companion/config"
+	"github.com/olad5/caution-companion/config/data"
+	loggingMiddleware "github.com/olad5/caution-companion/internal/handlers/logging"
+	"github.com/olad5/caution-companion/internal/infra/postgres"
+	"github.com/olad5/caution-companion/internal/infra/redis"
+	"github.com/olad5/caution-companion/pkg/api"
+	"github.com/olad5/caution-companion/pkg/utils/logger"
 )
 
 func main() {

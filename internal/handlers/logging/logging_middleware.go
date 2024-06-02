@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/olad5/go-hackathon-starter-template/config"
-	"github.com/olad5/go-hackathon-starter-template/pkg/utils/logger"
+	"github.com/olad5/caution-companion/config"
+	"github.com/olad5/caution-companion/pkg/utils/logger"
 	"github.com/rs/xid"
 	"go.uber.org/zap"
 )

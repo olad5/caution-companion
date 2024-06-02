@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/olad5/go-hackathon-starter-template/config"
+	"github.com/olad5/caution-companion/config"
 )
 
 type RedisCache struct {

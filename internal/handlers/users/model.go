@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/olad5/go-hackathon-starter-template/internal/domain"
+	"github.com/olad5/caution-companion/internal/domain"
 )
 
 type UserDTO struct {

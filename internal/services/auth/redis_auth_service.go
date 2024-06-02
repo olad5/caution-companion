@@ -9,8 +9,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/olad5/go-hackathon-starter-template/internal/domain"
-	"github.com/olad5/go-hackathon-starter-template/internal/infra"
+	"github.com/olad5/caution-companion/internal/domain"
+	"github.com/olad5/caution-companion/internal/infra"
 )
 
 type RedisAuthService struct {

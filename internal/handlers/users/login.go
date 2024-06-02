@@ -4,11 +4,11 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/olad5/go-hackathon-starter-template/internal/infra"
-	"github.com/olad5/go-hackathon-starter-template/internal/usecases/users"
-	appErrors "github.com/olad5/go-hackathon-starter-template/pkg/errors"
-	response "github.com/olad5/go-hackathon-starter-template/pkg/utils"
-	utils "github.com/olad5/go-hackathon-starter-template/pkg/utils/validation"
+	"github.com/olad5/caution-companion/internal/infra"
+	"github.com/olad5/caution-companion/internal/usecases/users"
+	appErrors "github.com/olad5/caution-companion/pkg/errors"
+	response "github.com/olad5/caution-companion/pkg/utils"
+	utils "github.com/olad5/caution-companion/pkg/utils/validation"
 )
 
 func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {

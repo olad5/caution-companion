@@ -1,4 +1,4 @@
-module github.com/olad5/go-hackathon-starter-template
+module github.com/olad5/caution-companion
 
 go 1.20
 

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/olad5/go-hackathon-starter-template/internal/domain"
+	"github.com/olad5/caution-companion/internal/domain"
 )
 
 type JWTClaims struct {

@@ -3,8 +3,8 @@ package handlers
 import (
 	"errors"
 
-	"github.com/olad5/go-hackathon-starter-template/internal/services/auth"
-	"github.com/olad5/go-hackathon-starter-template/internal/usecases/users"
+	"github.com/olad5/caution-companion/internal/services/auth"
+	"github.com/olad5/caution-companion/internal/usecases/users"
 	"go.uber.org/zap"
 )
 

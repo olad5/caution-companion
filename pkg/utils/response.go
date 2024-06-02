@@ -6,8 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	appErrors "github.com/olad5/go-hackathon-starter-template/pkg/errors"
-
+	appErrors "github.com/olad5/caution-companion/pkg/errors"
 	"go.uber.org/zap"
 )
 

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/olad5/go-hackathon-starter-template/internal/infra"
-	response "github.com/olad5/go-hackathon-starter-template/pkg/utils"
+	"github.com/olad5/caution-companion/internal/infra"
+	response "github.com/olad5/caution-companion/pkg/utils"
 )
 
 func (u UserHandler) GetLoggedInUser(w http.ResponseWriter, r *http.Request) {

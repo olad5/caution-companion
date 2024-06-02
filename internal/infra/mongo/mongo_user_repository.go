@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/olad5/go-hackathon-starter-template/config"
-	"github.com/olad5/go-hackathon-starter-template/internal/domain"
-	"github.com/olad5/go-hackathon-starter-template/internal/infra"
+	"github.com/olad5/caution-companion/config"
+	"github.com/olad5/caution-companion/internal/domain"
+	"github.com/olad5/caution-companion/internal/infra"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"

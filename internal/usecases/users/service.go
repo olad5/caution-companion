@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/olad5/go-hackathon-starter-template/internal/domain"
-	"github.com/olad5/go-hackathon-starter-template/internal/infra"
-	"github.com/olad5/go-hackathon-starter-template/internal/services/auth"
+	"github.com/olad5/caution-companion/internal/domain"
+	"github.com/olad5/caution-companion/internal/infra"
+	"github.com/olad5/caution-companion/internal/services/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -3,9 +3,9 @@ package auth
 import (
 	"net/http"
 
-	"github.com/olad5/go-hackathon-starter-template/internal/services/auth"
-	appErrors "github.com/olad5/go-hackathon-starter-template/pkg/errors"
-	response "github.com/olad5/go-hackathon-starter-template/pkg/utils"
+	"github.com/olad5/caution-companion/internal/services/auth"
+	appErrors "github.com/olad5/caution-companion/pkg/errors"
+	response "github.com/olad5/caution-companion/pkg/utils"
 )
 
 func EnsureAuthenticated(authService auth.AuthService) func(next http.Handler) http.Handler {

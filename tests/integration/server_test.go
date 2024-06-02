@@ -13,13 +13,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/olad5/go-hackathon-starter-template/config"
-	"github.com/olad5/go-hackathon-starter-template/config/data"
-	"github.com/olad5/go-hackathon-starter-template/internal/infra/postgres"
-	"github.com/olad5/go-hackathon-starter-template/internal/infra/redis"
-	"github.com/olad5/go-hackathon-starter-template/pkg/api"
-	"github.com/olad5/go-hackathon-starter-template/pkg/utils/logger"
-	"github.com/olad5/go-hackathon-starter-template/tests"
+	"github.com/olad5/caution-companion/config"
+	"github.com/olad5/caution-companion/config/data"
+	"github.com/olad5/caution-companion/internal/infra/postgres"
+	"github.com/olad5/caution-companion/internal/infra/redis"
+	"github.com/olad5/caution-companion/pkg/api"
+	"github.com/olad5/caution-companion/pkg/utils/logger"
+	"github.com/olad5/caution-companion/tests"
 )
 
 var (
