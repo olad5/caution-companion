@@ -26,7 +26,7 @@ var (
 )
 
 const (
-	JWT_HASH_NAME       = "go-starter-template-active-jwt-clients"
+	JWT_HASH_NAME       = "jwt-clients"
 	SessionTTLInMinutes = 10
 )
 
@@ -114,5 +114,5 @@ func (r *RedisAuthService) IsUserLoggedIn(ctx context.Context, authHeader, userI
 }
 
 func constructUserIdKey(key string) string {
-	return JWT_HASH_NAME + key
+	return JWT_HASH_NAME + "--" + key
 }

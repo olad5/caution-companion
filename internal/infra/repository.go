@@ -22,6 +22,7 @@ type UserRepository interface {
 
 type ReportRepository interface {
 	CreateReport(ctx context.Context, report domain.Report) error
-	GetReportsByUserId(ctx context.Context, userId uuid.UUID, pageNumber, rowsPerPage int) (domain.Report, error)
+	GetReportsByUserId(ctx context.Context, userId uuid.UUID, pageNumber, rowsPerPage int) ([]domain.Report, error)
+	GetLatestReports(ctx context.Context, pageNumber, rowsPerPage int) ([]domain.Report, error)
 	GetReportByReportId(ctx context.Context, reportId uuid.UUID) (domain.Report, error)
 }

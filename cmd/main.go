@@ -37,12 +37,17 @@ func main() {
 		log.Fatal("Error Initializing User Repo", err)
 	}
 
+	reportsRepo, err := postgres.NewPostgresReportRepo(ctx, postgresConnection)
+	if err != nil {
+		log.Fatal("Error Initializing Reports Repo", err)
+	}
+
 	redisCache, err := redis.New(ctx, configurations)
 	if err != nil {
 		log.Fatal("Error Initializing redisCache", err)
 	}
 
-	appRouter := api.NewHttpRouter(ctx, userRepo, redisCache, configurations, l)
+	appRouter := api.NewHttpRouter(ctx, userRepo, reportsRepo, redisCache, configurations, l)
 
 	port := configurations.Port
 	server := &http.Server{Addr: ":" + port, Handler: loggingMiddleware.RequestLogger(appRouter, configurations)}

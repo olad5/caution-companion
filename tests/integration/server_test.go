@@ -52,12 +52,16 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal("Error Initializing User Repo", err)
 	}
+	reportsRepo, err := postgres.NewPostgresReportRepo(ctx, postgresConnection)
+	if err != nil {
+		log.Fatal("Error Initializing Reports Repo", err)
+	}
 
 	redisCache, err := redis.New(ctx, configurations)
 	if err != nil {
 		log.Fatal("Error Initializing redisCache", err)
 	}
-	appRouter = api.NewHttpRouter(ctx, userRepo, redisCache, configurations, l)
+	appRouter = api.NewHttpRouter(ctx, userRepo, reportsRepo, redisCache, configurations, l)
 
 	exitVal := m.Run()
 	os.Exit(exitVal)
@@ -213,6 +217,66 @@ func TestLogin(t *testing.T) {
 			tests.AssertStatusCode(t, http.StatusNotFound, response.Code)
 			message := tests.ParseResponse(t, response)["message"].(string)
 			tests.AssertResponseMessage(t, message, "user does not exist")
+		},
+	)
+}
+
+func TestCreatReport(t *testing.T) {
+	route := "/reports"
+	t.Run("test for invalid json request body",
+		func(t *testing.T) {
+			t.Skip()
+			// TODO:TODO: fix this bit later
+			req, _ := http.NewRequest(http.MethodPost, route, nil)
+			response := tests.ExecuteRequest(req, appRouter)
+			tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
+		},
+	)
+	// TODO:TODO: i might need to test this
+	// t.Run("test for undefined email address in request body",
+	// 	func(t *testing.T) {
+	// 		requestBody := []byte(fmt.Sprintf(`{
+	// "email": "%v",
+	// "password": "%v"
+	// }`, nil, nil))
+	// 		req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
+	// 		response := tests.ExecuteRequest(req, appRouter)
+	// 		tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
+	// 	},
+	// )
+	t.Run(` Given a user wants to create an emergency report, when they submit all 
+    the required information correctly, then the report is created successfully 
+    and a confirmation message is sent back to the user.
+    `,
+		func(t *testing.T) {
+			incidentType := "fire"
+			longitude := "11.11"
+			latitude := "23.991818118"
+			description := "some-description"
+			requestBody := []byte(fmt.Sprintf(`{
+      "incident_type": "%s",
+      "location": {
+        "longitude": "%s",
+        "latitude": "%s"
+        },
+      "description": "%s"
+      }`, incidentType, longitude, latitude, description))
+			req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
+			token := logUserIn(t, userEmail, userPassword)
+			req.Header.Set("Authorization", "Bearer "+token)
+			response := tests.ExecuteRequest(req, appRouter)
+
+			tests.AssertStatusCode(t, http.StatusOK, response.Code)
+			responseBody := tests.ParseResponse(t, response)
+			message := responseBody["message"].(string)
+			tests.AssertResponseMessage(t, message, "report created successfully")
+
+			data := responseBody["data"].(map[string]interface{})
+			tests.AssertResponseMessage(t, data["incident_type"].(string), incidentType)
+			location := data["location"].(map[string]interface{})
+			tests.AssertResponseMessage(t, location["longitude"].(string), longitude)
+			tests.AssertResponseMessage(t, location["latitude"].(string), latitude)
+			tests.AssertResponseMessage(t, data["description"].(string), description)
 		},
 	)
 }

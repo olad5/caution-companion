@@ -43,7 +43,7 @@ func Check(val any) error {
 func translateOverride(trans ut.Translator) {
 	requiredTag := "required"
 	validate.RegisterTranslation(requiredTag, trans, func(ut ut.Translator) error {
-		return ut.Add(requiredTag, "{0} must have a value!", true) // see universal-translator for details
+		return ut.Add(requiredTag, "{0} must have a value", true) // see universal-translator for details
 	}, func(ut ut.Translator, fe validator.FieldError) string {
 		t, _ := ut.T(requiredTag, fe.Field())
 

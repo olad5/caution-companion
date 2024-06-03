@@ -34,7 +34,7 @@ func New(ctx context.Context, configurations *config.Configurations) (*RedisCach
 }
 
 func (r *RedisCache) SetOne(ctx context.Context, key, value string) error {
-	_, err := r.Client.Set(ctx, *r.AppName+key, value, ttl).Result()
+	_, err := r.Client.Set(ctx, r.prefixKeyWithAppName(key), value, ttl).Result()
 	if err != nil {
 		return fmt.Errorf("Error setting value in cache: %w", err)
 	}
@@ -42,7 +42,7 @@ func (r *RedisCache) SetOne(ctx context.Context, key, value string) error {
 }
 
 func (r *RedisCache) GetOne(ctx context.Context, key string) (string, error) {
-	result, err := r.Client.Get(ctx, key).Result()
+	result, err := r.Client.Get(ctx, r.prefixKeyWithAppName(key)).Result()
 	if err != nil {
 		return "", fmt.Errorf("Error getting value from cache: %w", err)
 	}
@@ -50,7 +50,7 @@ func (r *RedisCache) GetOne(ctx context.Context, key string) (string, error) {
 }
 
 func (r *RedisCache) DeleteOne(ctx context.Context, key string) error {
-	_, err := r.Client.Del(ctx, key).Result()
+	_, err := r.Client.Del(ctx, r.prefixKeyWithAppName(key)).Result()
 	if err != nil {
 		return fmt.Errorf("Error deleting key in cache: %w", err)
 	}
@@ -62,4 +62,8 @@ func (r *RedisCache) Ping(ctx context.Context) error {
 		return fmt.Errorf("Failed to Ping Redis Cache: %v", err)
 	}
 	return nil
+}
+
+func (r *RedisCache) prefixKeyWithAppName(key string) string {
+	return *r.AppName + key
 }

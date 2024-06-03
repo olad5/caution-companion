@@ -11,16 +11,25 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/olad5/caution-companion/config"
 	authMiddleware "github.com/olad5/caution-companion/internal/handlers/auth"
+	reportsHandlers "github.com/olad5/caution-companion/internal/handlers/reports"
 	userHandlers "github.com/olad5/caution-companion/internal/handlers/users"
 	"github.com/olad5/caution-companion/internal/infra"
 	"github.com/olad5/caution-companion/internal/services/auth"
+	"github.com/olad5/caution-companion/internal/usecases/reports"
 	"github.com/olad5/caution-companion/internal/usecases/users"
 	response "github.com/olad5/caution-companion/pkg/utils"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"go.uber.org/zap"
 )
 
-func NewHttpRouter(ctx context.Context, userRepo infra.UserRepository, cache infra.Cache, configurations *config.Configurations, l *zap.Logger) http.Handler {
+func NewHttpRouter(
+	ctx context.Context,
+	userRepo infra.UserRepository,
+	reportsRepo infra.ReportRepository,
+	cache infra.Cache,
+	configurations *config.Configurations,
+	l *zap.Logger,
+) http.Handler {
 	authService, err := auth.NewRedisAuthService(ctx, cache, configurations.JwtSecretKey)
 	if err != nil {
 		log.Fatal("Error Initializing Auth Service", err)
@@ -32,6 +41,14 @@ func NewHttpRouter(ctx context.Context, userRepo infra.UserRepository, cache inf
 	}
 
 	userHandler, err := userHandlers.NewUserHandler(*userService, authService, l)
+	if err != nil {
+		log.Fatal("failed to create the User handler: ", err)
+	}
+	reportsService, err := reports.NewReportsService(reportsRepo)
+	if err != nil {
+		log.Fatal("Error Initializing UserService")
+	}
+	reportsHandler, err := reportsHandlers.NewReportsHandler(*reportsService, l)
 	if err != nil {
 		log.Fatal("failed to create the User handler: ", err)
 	}
@@ -95,6 +112,17 @@ func NewHttpRouter(ctx context.Context, userRepo infra.UserRepository, cache inf
 		r.Use(authMiddleware.EnsureAuthenticated(authService))
 
 		r.Get("/users/me", userHandler.GetLoggedInUser)
+	})
+
+	router.Group(func(r chi.Router) {
+		r.Use(
+			middleware.AllowContentType("application/json"),
+			middleware.SetHeader("Content-Type", "application/json"),
+		)
+		r.Use(authMiddleware.EnsureAuthenticated(authService))
+
+		r.Post("/reports", reportsHandler.CreateReport)
+		r.Get("/reports/{id}", reportsHandler.GetReportByReportId)
 	})
 
 	return router
