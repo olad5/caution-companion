@@ -22,5 +22,5 @@ func (rh ReportsHandler) GetLatestReports(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	apiUtils.SuccessResponse(w, "latest reports retrieved successfully", ToReportsPagedDTO(reports), rh.logger)
+	apiUtils.SuccessResponse(w, "latest reports retrieved successfully", ToReportsPagedDTO(reports, pageInfo.Number), rh.logger)
 }

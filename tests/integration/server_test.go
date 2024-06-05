@@ -335,28 +335,6 @@ func TestGetReportByReportId(t *testing.T) {
 
 func TestGetLatestReports(t *testing.T) {
 	route := "/reports"
-
-	t.Run("test for invalid json request body",
-		func(t *testing.T) {
-			t.Skip()
-			// TODO:TODO: fix this bit later
-			req, _ := http.NewRequest(http.MethodPost, route, nil)
-			response := tests.ExecuteRequest(req, appRouter)
-			tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
-		},
-	)
-	// TODO:TODO: i might need to test this
-	// t.Run("test for undefined email address in request body",
-	// 	func(t *testing.T) {
-	// 		requestBody := []byte(fmt.Sprintf(`{
-	// "email": "%v",
-	// "password": "%v"
-	// }`, nil, nil))
-	// 		req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
-	// 		response := tests.ExecuteRequest(req, appRouter)
-	// 		tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
-	// 	},
-	// )
 	t.Run(`Given a user tries to get the latest emergency reports and there are 
     recent reports available, when they make the request, they receive a list 
     of the most recent emergency reports.
@@ -391,7 +369,8 @@ func TestGetLatestReports(t *testing.T) {
 			token := logUserIn(t, userEmail, userPassword)
 
 			const numberOfReports = 3
-			req, _ := http.NewRequest(http.MethodGet, route+"/latest"+"?page=1&rows="+fmt.Sprintf("%d", numberOfReports), nil)
+			const pageToRetrieve = 1
+			req, _ := http.NewRequest(http.MethodGet, route+"/latest"+"?page="+fmt.Sprintf("%d", pageToRetrieve)+"&rows="+fmt.Sprintf("%d", numberOfReports), nil)
 			req.Header.Set("Authorization", "Bearer "+token)
 			response := tests.ExecuteRequest(req, appRouter)
 
@@ -402,8 +381,16 @@ func TestGetLatestReports(t *testing.T) {
 
 			data := responseBody["data"].(map[string]interface{})
 			reports := data["items"].([]interface{})
+			page := data["page"].(float64)
+			rows := data["rows"].(float64)
 			if len(reports) != numberOfReports {
-				t.Errorf("got files length: %d expected: %d", len(reports), numberOfReports)
+				t.Errorf("got items length: %d expected: %d", len(reports), numberOfReports)
+			}
+			if rows != numberOfReports {
+				t.Errorf("got rows number retrieved: %v expected: %d", rows, numberOfReports)
+			}
+			if page != pageToRetrieve {
+				t.Errorf("got rows number retrieved: %v expected: %d", page, pageToRetrieve)
 			}
 		},
 	)

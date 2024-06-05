@@ -68,9 +68,9 @@ func (p *PostgresReportRepository) GetLatestReports(ctx context.Context, pageNum
 	offset := (pageNumber - 1) * rowsPerPage
 	var reports []SqlxReport
 
-	// TODO:TODO: fix the time sorting here
 	query := fmt.Sprintf(`
     SELECT * FROM reports 
+    ORDER BY created_at
     OFFSET %d ROWS FETCH NEXT %d ROWS ONLY
 	`, offset, rowsPerPage)
 
@@ -101,6 +101,20 @@ func (p *PostgresReportRepository) GetReportByReportId(ctx context.Context, repo
 		return domain.Report{}, fmt.Errorf("error getting report by reportId: %w", err)
 	}
 	return toReport(report), nil
+}
+
+func (p *PostgresReportRepository) Count(ctx context.Context) (int, error) {
+	const q = `
+	SELECT
+		count(1)
+	FROM
+		reports`
+
+	var count int
+	if err := p.connection.Get(&count, q); err != nil {
+		return 0, fmt.Errorf("failed to get the count from the postgres database: %w", err)
+	}
+	return count, nil
 }
 
 func (p *PostgresReportRepository) Ping(ctx context.Context) error {

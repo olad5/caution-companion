@@ -35,19 +35,19 @@ func ToReportDTO(report domain.Report) ReportDTO {
 }
 
 type ReportsPagedDTO struct {
-	// TODO:TODO: i am not sure about this limit, i think it should be page
-	// TODO:TODO: you should add the current page to the response
-	Limit int         `json:"limit"`
+	Rows  int         `json:"rows"`
+	Page  int         `json:"page"`
 	Items []ReportDTO `json:"items"`
 }
 
-func ToReportsPagedDTO(reports []domain.Report) ReportsPagedDTO {
+func ToReportsPagedDTO(reports []domain.Report, page int) ReportsPagedDTO {
 	items := []ReportDTO{}
 	for _, report := range reports {
 		items = append(items, ToReportDTO(report))
 	}
 	return ReportsPagedDTO{
-		Limit: len(items),
+		Page:  page,
+		Rows:  len(items),
 		Items: items,
 	}
 }
