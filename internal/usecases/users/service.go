@@ -13,8 +13,7 @@ import (
 )
 
 type UserService struct {
-	userRepo infra.UserRepository
-	// TODO:TODO: I think this should have a logger as well
+	userRepo    infra.UserRepository
 	authService auth.AuthService
 }
 
@@ -80,7 +79,7 @@ func (u *UserService) LogUserIn(ctx context.Context, email, password string) (st
 func (u *UserService) GetLoggedInUser(ctx context.Context) (domain.User, error) {
 	jwtClaims, ok := auth.GetJWTClaims(ctx)
 	if !ok {
-		return domain.User{}, fmt.Errorf("error parsing JWTClaims")
+		return domain.User{}, fmt.Errorf("error parsing JWTClaims: %v", ErrInvalidToken)
 	}
 	userId := jwtClaims.ID
 
