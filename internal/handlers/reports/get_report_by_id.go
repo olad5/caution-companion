@@ -22,7 +22,7 @@ func (rh ReportsHandler) GetReportByReportId(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		switch {
 		case errors.Is(err, infra.ErrReportNotFound):
-			response.ErrorResponse(w, err.Error(), http.StatusBadRequest)
+			response.ErrorResponse(w, err.Error(), http.StatusNotFound)
 			return
 		default:
 			response.InternalServerErrorResponse(w, err, rh.logger)

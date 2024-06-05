@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Server",
+    "title": "Caution Companion",
     "description": "APIs for Server",
     "version": "0.0.1"
   },
@@ -173,7 +173,185 @@
             }
           },
           "400": {
-            "description": "Client Error | Unauthorized Error | Internal Server Error",
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports": {
+      "post": {
+        "tags": ["Reports"],
+        "summary": "Creates an Emergency Report ",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNewReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReportByReportIdResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/latest": {
+      "get": {
+        "tags": ["Reports"],
+        "summary": "Get latest Emergency Reports ",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLatestReportsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Client Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/{id}": {
+      "get": {
+        "tags": ["Reports"],
+        "summary": "Returns an Emergency Report by id ",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetReportByReportIdResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -250,6 +428,158 @@
           "message": {
             "type": "string"
           }
+        }
+      },
+      "SingleReportResponse": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "incident_type": {
+            "type": "string"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "longitude": {
+                "type": "string"
+              },
+              "latitude": {
+                "type": "string"
+              }
+            },
+            "required": ["longitude", "latitude"]
+          },
+          "description": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "incident_type",
+          "location",
+          "description",
+          "created_at",
+          "updated_at"
+        ],
+        "example": {
+          "id": "d4d0e3ff-6395-4a50-90a9-146cfa75cba1",
+          "incident_type": "d4d0e3ff-6395-4a50-90a9-146cfa75cba1",
+          "location": {
+            "longitude": "12.099",
+            "latitude": "10.099"
+          },
+          "description": "fire outbreak at Car Park",
+          "created_at": "2024-06-05T21:31:15.342491Z",
+          "updated_at": "2024-06-05T21:31:15.342491Z"
+        }
+      },
+      "GetReportByReportIdResponse": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "$ref": "#/components/schemas/SingleReportResponse"
+          }
+        },
+        "required": ["status", "message", "data"]
+      },
+      "GetLatestReportsResponse": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "rows": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "items": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "$ref": "#/components/schemas/SingleReportResponse"
+                }
+              }
+            },
+            "required": ["rows", "page", "items"],
+            "example": {
+              "rows": 1,
+              "page": 1,
+              "items": [
+                {
+                  "id": "d4d0e3ff-6395-4a50-90a9-146cfa75cba1",
+                  "incident_type": "d4d0e3ff-6395-4a50-90a9-146cfa75cba1",
+                  "location": {
+                    "longitude": "12.099",
+                    "latitude": "10.099"
+                  },
+                  "description": "fire outbreak at Car Park",
+                  "created_at": "2024-06-05T21:31:15.342491Z",
+                  "updated_at": "2024-06-05T21:31:15.342491Z"
+                }
+              ]
+            }
+          }
+        },
+        "required": ["status", "message", "data"]
+      },
+
+      "CreateNewReportRequest": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "incident_type": {
+            "type": "string"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "longitude": {
+                "type": "string"
+              },
+              "latitude": {
+                "type": "string"
+              }
+            },
+            "required": ["longitude", "latitude"]
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": ["incident_type", "location", "description"],
+        "example": {
+          "incident_type": "robbery",
+          "location": {
+            "longitude": "12.9",
+            "latitude": "10.9"
+          },
+          "description": "robbery at ICT car park"
         }
       },
       "HealthCheckResponse": {
