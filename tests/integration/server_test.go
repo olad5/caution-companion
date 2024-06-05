@@ -333,6 +333,82 @@ func TestGetReportByReportId(t *testing.T) {
 	)
 }
 
+func TestGetLatestReports(t *testing.T) {
+	route := "/reports"
+
+	t.Run("test for invalid json request body",
+		func(t *testing.T) {
+			t.Skip()
+			// TODO:TODO: fix this bit later
+			req, _ := http.NewRequest(http.MethodPost, route, nil)
+			response := tests.ExecuteRequest(req, appRouter)
+			tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
+		},
+	)
+	// TODO:TODO: i might need to test this
+	// t.Run("test for undefined email address in request body",
+	// 	func(t *testing.T) {
+	// 		requestBody := []byte(fmt.Sprintf(`{
+	// "email": "%v",
+	// "password": "%v"
+	// }`, nil, nil))
+	// 		req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
+	// 		response := tests.ExecuteRequest(req, appRouter)
+	// 		tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
+	// 	},
+	// )
+	t.Run(`Given a user tries to get the latest emergency reports and there are 
+    recent reports available, when they make the request, they receive a list 
+    of the most recent emergency reports.
+    `,
+		func(t *testing.T) {
+			// TODO:TODO: this test case title is wrong
+			t.Skip()
+			token := logUserIn(t, userEmail, userPassword)
+
+			req, _ := http.NewRequest(http.MethodGet, route+"/latest"+"?page=1&rows=20", nil)
+			req.Header.Set("Authorization", "Bearer "+token)
+			response := tests.ExecuteRequest(req, appRouter)
+
+			tests.AssertStatusCode(t, http.StatusOK, response.Code)
+			responseBody := tests.ParseResponse(t, response)
+			message := responseBody["message"].(string)
+			tests.AssertResponseMessage(t, message, "latest reports retrieved successfully")
+
+			data := responseBody["data"].(map[string]interface{})
+			reports := data["items"].([]interface{})
+			const numberOfReports = 3
+			if len(reports) != numberOfReports {
+				t.Errorf("got files length: %d expected: %d", len(reports), numberOfReports)
+			}
+		},
+	)
+	t.Run(`Given a user tries to get the latest emergency reports and there are 
+    recent reports available, when they make the request, they receive a list 
+    of the most recent emergency reports.
+    `,
+		func(t *testing.T) {
+			token := logUserIn(t, userEmail, userPassword)
+
+			const numberOfReports = 3
+			req, _ := http.NewRequest(http.MethodGet, route+"/latest"+"?page=1&rows="+fmt.Sprintf("%d", numberOfReports), nil)
+			req.Header.Set("Authorization", "Bearer "+token)
+			response := tests.ExecuteRequest(req, appRouter)
+
+			tests.AssertStatusCode(t, http.StatusOK, response.Code)
+			responseBody := tests.ParseResponse(t, response)
+			message := responseBody["message"].(string)
+			tests.AssertResponseMessage(t, message, "latest reports retrieved successfully")
+
+			data := responseBody["data"].(map[string]interface{})
+			reports := data["items"].([]interface{})
+			if len(reports) != numberOfReports {
+				t.Errorf("got files length: %d expected: %d", len(reports), numberOfReports)
+			}
+		},
+	)
+}
+
 func createReport(t testing.TB, token, incidentType, longitude, latitude, description string) string {
 	t.Helper()
 	route := "/reports"

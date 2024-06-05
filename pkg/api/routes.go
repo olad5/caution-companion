@@ -123,6 +123,7 @@ func NewHttpRouter(
 
 		r.Post("/reports", reportsHandler.CreateReport)
 		r.Get("/reports/{id}", reportsHandler.GetReportByReportId)
+		r.Get("/reports/latest", reportsHandler.GetLatestReports)
 	})
 
 	return router
