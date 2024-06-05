@@ -368,7 +368,7 @@ func TestGetLatestReports(t *testing.T) {
 		func(t *testing.T) {
 			token := logUserIn(t, userEmail, userPassword)
 
-			const numberOfReports = 3
+			const numberOfReports = 2
 			const pageToRetrieve = 1
 			req, _ := http.NewRequest(http.MethodGet, route+"/latest"+"?page="+fmt.Sprintf("%d", pageToRetrieve)+"&rows="+fmt.Sprintf("%d", numberOfReports), nil)
 			req.Header.Set("Authorization", "Bearer "+token)
