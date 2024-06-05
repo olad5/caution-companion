@@ -281,6 +281,80 @@ func TestCreatReport(t *testing.T) {
 	)
 }
 
+func TestGetReportByReportId(t *testing.T) {
+	route := "/reports"
+	t.Run("test for invalid json request body",
+		func(t *testing.T) {
+			t.Skip()
+			// TODO:TODO: fix this bit later
+			req, _ := http.NewRequest(http.MethodPost, route, nil)
+			response := tests.ExecuteRequest(req, appRouter)
+			tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
+		},
+	)
+	// TODO:TODO: i might need to test this
+	// t.Run("test for undefined email address in request body",
+	// 	func(t *testing.T) {
+	// 		requestBody := []byte(fmt.Sprintf(`{
+	// "email": "%v",
+	// "password": "%v"
+	// }`, nil, nil))
+	// 		req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
+	// 		response := tests.ExecuteRequest(req, appRouter)
+	// 		tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
+	// 	},
+	// )
+	t.Run(` Given a user tries to get an emergency report by ID and the report 
+    exists, when they provide the correct ID, they receive the report details.
+    `,
+		func(t *testing.T) {
+			incidentType := "fire"
+			longitude := "11.11"
+			latitude := "23.991818118"
+			description := "some-description"
+			token := logUserIn(t, userEmail, userPassword)
+			reportId := createReport(t, token, incidentType, longitude, latitude, description)
+			req, _ := http.NewRequest(http.MethodGet, route+"/"+reportId, nil)
+			req.Header.Set("Authorization", "Bearer "+token)
+			response := tests.ExecuteRequest(req, appRouter)
+
+			tests.AssertStatusCode(t, http.StatusOK, response.Code)
+			responseBody := tests.ParseResponse(t, response)
+			message := responseBody["message"].(string)
+			tests.AssertResponseMessage(t, message, "report retrieved successfully")
+
+			data := responseBody["data"].(map[string]interface{})
+			tests.AssertResponseMessage(t, data["incident_type"].(string), incidentType)
+			location := data["location"].(map[string]interface{})
+			tests.AssertResponseMessage(t, location["longitude"].(string), longitude)
+			tests.AssertResponseMessage(t, location["latitude"].(string), latitude)
+			tests.AssertResponseMessage(t, data["description"].(string), description)
+		},
+	)
+}
+
+func createReport(t testing.TB, token, incidentType, longitude, latitude, description string) string {
+	t.Helper()
+	route := "/reports"
+	requestBody := []byte(fmt.Sprintf(`{
+      "incident_type": "%s",
+      "location": {
+        "longitude": "%s",
+        "latitude": "%s"
+        },
+      "description": "%s"
+      }`, incidentType, longitude, latitude, description))
+	req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	response := tests.ExecuteRequest(req, appRouter)
+	responseBody := tests.ParseResponse(t, response)
+	data := responseBody["data"].(map[string]interface{})
+	reportId := data["id"].(string)
+
+	return reportId
+}
+
 func createUser(t testing.TB, firstName, lastName, email, password string) string {
 	t.Helper()
 	route := "/users"

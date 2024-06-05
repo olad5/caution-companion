@@ -32,6 +32,7 @@ func AssertResponseMessage(t *testing.T, got, expected string) {
 }
 
 func ParseResponse(t testing.TB, w *httptest.ResponseRecorder) map[string]interface{} {
+	t.Helper()
 	res := make(map[string]interface{})
 	body := w.Body
 	err := json.NewDecoder(body).Decode(&res)

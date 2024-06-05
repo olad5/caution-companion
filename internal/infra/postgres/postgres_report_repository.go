@@ -93,7 +93,7 @@ func (p *PostgresReportRepository) GetLatestReports(ctx context.Context, pageNum
 func (p *PostgresReportRepository) GetReportByReportId(ctx context.Context, reportId uuid.UUID) (domain.Report, error) {
 	var report SqlxReport
 
-	err := p.connection.Get(&report, "SELECT * FROM users WHERE id = $1", reportId)
+	err := p.connection.Get(&report, "SELECT * FROM reports WHERE id = $1", reportId)
 	if err != nil {
 		if errors.Is(err, ErrRecordNotFound) {
 			return domain.Report{}, infra.ErrReportNotFound
