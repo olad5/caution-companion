@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Caution Companion",
-    "description": "APIs for Server",
+    "description": "APIs for Caution Companion",
     "version": "0.0.1"
   },
   "servers": [
@@ -15,6 +15,7 @@
       "description": "Local Development server (uses test data)"
     }
   ],
+  "security": [{ "bearerAuth": [] }],
   "paths": {
     "/health": {
       "get": {
@@ -220,7 +221,6 @@
           },
           "required": true
         },
-        "security": [],
         "responses": {
           "200": {
             "description": "",
@@ -269,7 +269,6 @@
       "get": {
         "tags": ["Reports"],
         "summary": "Get latest Emergency Reports ",
-        "security": [],
         "responses": {
           "200": {
             "description": "",
@@ -318,7 +317,6 @@
       "get": {
         "tags": ["Reports"],
         "summary": "Returns an Emergency Report by id ",
-        "security": [],
         "responses": {
           "200": {
             "description": "",
@@ -681,6 +679,5 @@
         }
       }
     }
-  },
-  "security": [{ "bearerAuth": [] }]
+  }
 }
