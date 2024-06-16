@@ -317,6 +317,17 @@
       "get": {
         "tags": ["Reports"],
         "summary": "Returns an Emergency Report by id ",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id of the report",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
