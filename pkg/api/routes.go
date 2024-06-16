@@ -98,8 +98,9 @@ func NewHttpRouter(
 			middleware.AllowContentType("application/json"),
 			middleware.SetHeader("Content-Type", "application/json"),
 		)
-		r.Post("/users/login", userHandler.Login)
 		r.Post("/users", userHandler.CreateUser)
+		r.Post("/users/login", userHandler.Login)
+		r.Post("/users/token/refresh", userHandler.RefreshAccessToken)
 	})
 
 	// -------------------------------------------------------------------------

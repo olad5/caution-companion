@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -14,6 +15,7 @@ type RedisCache struct {
 	AppName *string
 }
 
+// TODO:TODO: this ttl should come from the configs
 var ttl = time.Minute * 30
 
 func New(ctx context.Context, configurations *config.Configurations) (*RedisCache, error) {
@@ -28,7 +30,8 @@ func New(ctx context.Context, configurations *config.Configurations) (*RedisCach
 	}
 
 	return &RedisCache{
-		Client:  client,
+		Client: client,
+		// TODO:TODO: you should have a default ttl config if none is given
 		AppName: &configurations.AppName,
 	}, nil
 }
@@ -49,6 +52,18 @@ func (r *RedisCache) GetOne(ctx context.Context, key string) (string, error) {
 	return result, nil
 }
 
+func (r *RedisCache) GetAllKeysUsingWildCard(ctx context.Context, wildcard string) ([]string, error) {
+	rr, err := r.Client.Keys(ctx, wildcard).Result()
+	if err != nil {
+		return []string{""}, fmt.Errorf("Error getting wildcard values from cache: %w", err)
+	}
+	var results []string
+	for _, result := range rr {
+		results = append(results, r.removeAppNamePrefixKey(result))
+	}
+	return results, nil
+}
+
 func (r *RedisCache) DeleteOne(ctx context.Context, key string) error {
 	_, err := r.Client.Del(ctx, r.prefixKeyWithAppName(key)).Result()
 	if err != nil {
@@ -62,6 +77,10 @@ func (r *RedisCache) Ping(ctx context.Context) error {
 		return fmt.Errorf("Failed to Ping Redis Cache: %v", err)
 	}
 	return nil
+}
+
+func (r *RedisCache) removeAppNamePrefixKey(key string) string {
+	return strings.TrimPrefix(key, *r.AppName)
 }
 
 func (r *RedisCache) prefixKeyWithAppName(key string) string {

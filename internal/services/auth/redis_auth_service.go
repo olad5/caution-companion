@@ -27,6 +27,9 @@ var (
 
 const (
 	JWT_HASH_NAME       = "jwt-clients"
+	refreshPrefix       = "refresh-"
+	keyDelimiter        = "--"
+	colonDelimiter      = ":"
 	SessionTTLInMinutes = 10
 )
 
@@ -42,22 +45,112 @@ func NewRedisAuthService(ctx context.Context, cache infra.Cache, jwtSecretKey st
 	return &RedisAuthService{cache, jwtSecretKey}, nil
 }
 
-func (r *RedisAuthService) GenerateJWT(ctx context.Context, user domain.User) (string, error) {
+func (r *RedisAuthService) GenerateAuthTokens(ctx context.Context, user domain.User) (string, string, error) {
+	err := r.deleteTokensTiedToUserId(ctx, user.ID.String())
+	if err != nil {
+		return "", "", fmt.Errorf("unable to delete existing accessTokens: %w", ErrGeneratingToken)
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   user.ID,
 		"email": user.Email,
 		"exp":   time.Now().Add(time.Minute * SessionTTLInMinutes).Unix(),
 	})
-	tokenString, err := token.SignedString([]byte(r.SecretKey))
+	accessToken, err := token.SignedString([]byte(r.SecretKey))
 	if err != nil {
-		return "", ErrGeneratingToken
+		return "", "", ErrGeneratingToken
 	}
 
-	err = r.Cache.SetOne(ctx, constructUserIdKey(user.ID.String()), tokenString)
+	refreshToken := uuid.New().String()
+	err = r.Cache.SetOne(ctx, constructKey(user.ID.String(), refreshToken), accessToken)
 	if err != nil {
-		return "", ErrGeneratingToken
+		return "", "", ErrGeneratingToken
 	}
-	return tokenString, nil
+	return accessToken, refreshToken, nil
+}
+
+func (r *RedisAuthService) getKeysTiedToAUserId(ctx context.Context, userId string) ([]string, error) {
+	results, err := r.Cache.GetAllKeysUsingWildCard(ctx, "*"+userId)
+	if err != nil {
+		return []string{""}, infra.ErrUserNotFound
+	}
+
+	return results, nil
+}
+
+func (r *RedisAuthService) GetUserIdFromRefreshToken(ctx context.Context, refreshToken string) (uuid.UUID, error) {
+	match := "*" + refreshPrefix + refreshToken + ":*"
+	results, err := r.Cache.GetAllKeysUsingWildCard(ctx, match)
+	if err != nil {
+		return uuid.New(), ErrInvalidToken
+	}
+	if len(results) != 1 {
+		return uuid.New(), ErrInvalidToken
+	}
+
+	first := results[0]
+
+	elements := strings.Split(first, JWT_HASH_NAME+keyDelimiter)
+
+	id, err := uuid.Parse(elements[1])
+	if err != nil {
+		return uuid.New(), ErrInvalidToken
+	}
+
+	return id, nil
+}
+
+func (r *RedisAuthService) extractTokensFromExistingValueInCache(ctx context.Context, userId string) (string, string, error) {
+	results, err := r.getKeysTiedToAUserId(ctx, userId)
+	if err != nil {
+		return "", "", fmt.Errorf("Error extracting tokens from cache: %w", err)
+	}
+
+	if len(results) == 0 {
+		return "", "", fmt.Errorf("Error extracting tokens from cache: No token found")
+	}
+	if len(results) != 1 {
+		return "", "", fmt.Errorf("Error extracting tokens from cache")
+	}
+
+	first := results[0]
+
+	acccessToken, err := r.Cache.GetOne(ctx, first)
+	if err != nil {
+		return "", "", fmt.Errorf("Error extracting tokens from cache: %w", err)
+	}
+	refreshToken, err := extractRefreshTokenFromKey(first)
+	if err != nil {
+		return "", "", fmt.Errorf("Error extracting tokens from cache: %w", err)
+	}
+	return acccessToken, refreshToken, nil
+}
+
+func extractRefreshTokenFromKey(token string) (string, error) {
+	tokenSplits := strings.Split(token, refreshPrefix)
+	if len(tokenSplits) == 1 && tokenSplits[0] == token {
+		return "", fmt.Errorf("Error extracting refresh token from key: %w", ErrInvalidToken)
+	}
+
+	refreshSplits := strings.Split(tokenSplits[1], colonDelimiter+JWT_HASH_NAME)
+	if len(refreshSplits) == 1 && refreshSplits[0] == tokenSplits[1] {
+		return "", fmt.Errorf("Error extracting refresh token from key: %w", ErrInvalidToken)
+	}
+
+	return refreshSplits[0], nil
+}
+
+func (r *RedisAuthService) deleteTokensTiedToUserId(ctx context.Context, userId string) error {
+	keys, err := r.getKeysTiedToAUserId(ctx, userId)
+	if err != nil {
+		return fmt.Errorf("Error deleting tokens tied to user: %w", err)
+	}
+	for _, key := range keys {
+		err := r.Cache.DeleteOne(ctx, key)
+		if err != nil {
+			return fmt.Errorf("Error deleting tokens tied to user: %w", err)
+		}
+	}
+	return nil
 }
 
 func (r *RedisAuthService) DecodeJWT(ctx context.Context, authHeader string) (JWTClaims, error) {
@@ -105,14 +198,14 @@ func (r *RedisAuthService) DecodeJWT(ctx context.Context, authHeader string) (JW
 }
 
 func (r *RedisAuthService) IsUserLoggedIn(ctx context.Context, authHeader, userId string) bool {
-	token := strings.Split(authHeader, " ")[1]
-	cachedToken, err := r.Cache.GetOne(ctx, constructUserIdKey(userId))
-	if err != nil || cachedToken != token {
+	existingAccesstoken := strings.Split(authHeader, " ")[1]
+	cachedAccessToken, _, err := r.extractTokensFromExistingValueInCache(ctx, userId)
+	if err != nil || cachedAccessToken != existingAccesstoken {
 		return false
 	}
 	return true
 }
 
-func constructUserIdKey(key string) string {
-	return JWT_HASH_NAME + "--" + key
+func constructKey(userId, refreshToken string) string {
+	return refreshPrefix + refreshToken + colonDelimiter + JWT_HASH_NAME + keyDelimiter + userId
 }

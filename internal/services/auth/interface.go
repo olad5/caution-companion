@@ -27,6 +27,7 @@ func GetJWTClaims(ctx context.Context) (JWTClaims, bool) {
 
 type AuthService interface {
 	DecodeJWT(ctx context.Context, tokenString string) (JWTClaims, error)
-	GenerateJWT(ctx context.Context, user domain.User) (string, error)
+	GenerateAuthTokens(ctx context.Context, user domain.User) (string, string, error)
 	IsUserLoggedIn(ctx context.Context, authHeader, userId string) bool
+	GetUserIdFromRefreshToken(ctx context.Context, refreshToken string) (uuid.UUID, error)
 }

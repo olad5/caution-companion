@@ -168,12 +168,12 @@ func TestLogin(t *testing.T) {
 
 			accessToken, exists := data["access_token"]
 			if !exists {
-				t.Error("Missing 'accesstoken' key in the JSON response")
+				t.Error("Missing 'access_token' key in the JSON response")
 			}
 
 			_, isString := accessToken.(string)
 			if !isString {
-				t.Error("'accesstoken' value is not a string")
+				t.Error("'access_token' value is not a string")
 			}
 		},
 	)
@@ -221,6 +221,55 @@ func TestLogin(t *testing.T) {
 	)
 }
 
+func TestRefreshToken(t *testing.T) {
+	route := "/users/token/refresh"
+	t.Run(`Given a user tries to refresh their JWT token and provides a valid
+    refresh token, when the request is processed, they receive a new JWT token
+    and a response indicating success. `,
+		func(t *testing.T) {
+			token, existingRefreshToken := logUserIn(t, userEmail, userPassword)
+			existingUserId := getCurrentUser(t, token)["id"].(string)
+
+			requestBody := []byte(fmt.Sprintf(`{
+      "refresh_token": "%s"
+      }`, existingRefreshToken))
+			req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
+			response := tests.ExecuteRequest(req, appRouter)
+
+			tests.AssertStatusCode(t, http.StatusOK, response.Code)
+			responseBody := tests.ParseResponse(t, response)
+			message := responseBody["message"].(string)
+			tests.AssertResponseMessage(t, message, "access token refreshed successfully")
+
+			data := responseBody["data"].(map[string]interface{})
+
+			accessTokenField, exists := data["access_token"]
+			if !exists {
+				t.Error("Missing 'access_token' key in the JSON response")
+			}
+
+			newAccessToken, isString := accessTokenField.(string)
+			if !isString {
+				t.Error("'access_token' value is not a string")
+			}
+			refreshTokenField, exists := data["refresh_token"]
+			if !exists {
+				t.Error("Missing 'refresh_token' key in the JSON response")
+			}
+
+			_, isString = refreshTokenField.(string)
+			if !isString {
+				t.Error("'refresh_token' value is not a string")
+			}
+
+			userId := getCurrentUser(t, newAccessToken)["id"].(string)
+			if existingUserId != userId {
+				t.Error("user ids do not match")
+			}
+		},
+	)
+}
+
 func TestCreatReport(t *testing.T) {
 	route := "/reports"
 	t.Run("test for invalid json request body",
@@ -262,7 +311,7 @@ func TestCreatReport(t *testing.T) {
       "description": "%s"
       }`, incidentType, longitude, latitude, description))
 			req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
-			token := logUserIn(t, userEmail, userPassword)
+			token, _ := logUserIn(t, userEmail, userPassword)
 			req.Header.Set("Authorization", "Bearer "+token)
 			response := tests.ExecuteRequest(req, appRouter)
 
@@ -312,7 +361,7 @@ func TestGetReportByReportId(t *testing.T) {
 			longitude := "11.11"
 			latitude := "23.991818118"
 			description := "some-description"
-			token := logUserIn(t, userEmail, userPassword)
+			token, _ := logUserIn(t, userEmail, userPassword)
 			reportId := createReport(t, token, incidentType, longitude, latitude, description)
 			req, _ := http.NewRequest(http.MethodGet, route+"/"+reportId, nil)
 			req.Header.Set("Authorization", "Bearer "+token)
@@ -342,7 +391,7 @@ func TestGetLatestReports(t *testing.T) {
 		func(t *testing.T) {
 			// TODO:TODO: this test case title is wrong
 			t.Skip()
-			token := logUserIn(t, userEmail, userPassword)
+			token, _ := logUserIn(t, userEmail, userPassword)
 
 			req, _ := http.NewRequest(http.MethodGet, route+"/latest"+"?page=1&rows=20", nil)
 			req.Header.Set("Authorization", "Bearer "+token)
@@ -366,7 +415,7 @@ func TestGetLatestReports(t *testing.T) {
     of the most recent emergency reports.
     `,
 		func(t *testing.T) {
-			token := logUserIn(t, userEmail, userPassword)
+			token, _ := logUserIn(t, userEmail, userPassword)
 
 			const numberOfReports = 2
 			const pageToRetrieve = 1
@@ -445,7 +494,8 @@ func getCurrentUser(t testing.TB, token string) map[string]interface{} {
 	return data
 }
 
-func logUserIn(t testing.TB, email, password string) string {
+func logUserIn(t testing.TB, email, password string) (string, string) {
+	t.Helper()
 	requestBody := []byte(fmt.Sprintf(`{
       "email": "%s",
       "password": "%s"
@@ -454,7 +504,9 @@ func logUserIn(t testing.TB, email, password string) string {
 	loginResponse := tests.ExecuteRequest(loginReq, appRouter)
 	loginResponseBody := tests.ParseResponse(t, loginResponse)
 	loginData := loginResponseBody["data"].(map[string]interface{})
-	accessToken := loginData["access_token"]
-	token := accessToken.(string)
-	return token
+	accessTokenField := loginData["access_token"]
+	accessToken := accessTokenField.(string)
+	refreshTokenField := loginData["refresh_token"]
+	refreshToken := refreshTokenField.(string)
+	return accessToken, refreshToken
 }

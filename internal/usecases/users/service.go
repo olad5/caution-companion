@@ -59,21 +59,21 @@ func (u *UserService) CreateUser(ctx context.Context, firstName, lastName, email
 	return newUser, nil
 }
 
-func (u *UserService) LogUserIn(ctx context.Context, email, password string) (string, error) {
+func (u *UserService) LogUserIn(ctx context.Context, email, password string) (string, string, error) {
 	existingUser, err := u.userRepo.GetUserByEmail(ctx, email)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if isPasswordCorrect := comparePasswords(existingUser.Password, []byte(password)); !isPasswordCorrect {
-		return "", ErrPasswordIncorrect
+		return "", "", ErrPasswordIncorrect
 	}
 
-	accessToken, err := u.authService.GenerateJWT(ctx, existingUser)
+	accessToken, refreshToken, err := u.authService.GenerateAuthTokens(ctx, existingUser)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return accessToken, nil
+	return accessToken, refreshToken, nil
 }
 
 func (u *UserService) GetLoggedInUser(ctx context.Context) (domain.User, error) {
@@ -88,6 +88,24 @@ func (u *UserService) GetLoggedInUser(ctx context.Context) (domain.User, error) 
 		return domain.User{}, err
 	}
 	return existingUser, nil
+}
+
+func (u *UserService) RefreshUserAccessToken(ctx context.Context, existingRefreshToken string) (string, string, error) {
+	userId, err := u.authService.GetUserIdFromRefreshToken(ctx, existingRefreshToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	existingUser, err := u.userRepo.GetUserByUserId(ctx, userId)
+	if err != nil {
+		return "", "", err
+	}
+
+	accessToken, refreshToken, err := u.authService.GenerateAuthTokens(ctx, existingUser)
+	if err != nil {
+		return "", "", err
+	}
+	return accessToken, refreshToken, nil
 }
 
 func hashAndSalt(plainPassword []byte) (string, error) {

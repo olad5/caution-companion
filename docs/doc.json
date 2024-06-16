@@ -103,7 +103,7 @@
               },
               "example": {
                 "email": "susanrice@gmail.com",
-                "password": "secret"
+                "password": "secret-password"
               }
             }
           },
@@ -129,11 +129,11 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "accessToken": {
+                        "access_token": {
                           "type": "string",
                           "minLength": 1
                         },
-                        "refreshToken": {
+                        "refresh_token": {
                           "type": "string",
                           "minLength": 1
                         }
@@ -658,7 +658,7 @@
         },
         "example": {
           "email": "susanrice@gmail.com",
-          "password": "secret",
+          "password": "secret-password",
           "first_name": "susan",
           "last_name": "rice"
         }
@@ -677,7 +677,7 @@
         },
         "example": {
           "email": "susanrice@gmail.com",
-          "password": "secret"
+          "password": "secret-password"
         }
       }
     }

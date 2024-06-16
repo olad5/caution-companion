@@ -7,6 +7,7 @@ import (
 type Cache interface {
 	SetOne(ctx context.Context, key, value string) error
 	GetOne(ctx context.Context, key string) (string, error)
+	GetAllKeysUsingWildCard(ctx context.Context, wildcard string) ([]string, error)
 	DeleteOne(ctx context.Context, key string) error
 	Ping(ctx context.Context) error
 }
