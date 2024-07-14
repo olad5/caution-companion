@@ -15,9 +15,6 @@ type RedisCache struct {
 	AppName *string
 }
 
-// TODO:TODO: this ttl should come from the configs
-var ttl = time.Minute * 30
-
 func New(ctx context.Context, configurations *config.Configurations) (*RedisCache, error) {
 	opts, err := redis.ParseURL(configurations.CacheAddress)
 	if err != nil {
@@ -30,13 +27,12 @@ func New(ctx context.Context, configurations *config.Configurations) (*RedisCach
 	}
 
 	return &RedisCache{
-		Client: client,
-		// TODO:TODO: you should have a default ttl config if none is given
+		Client:  client,
 		AppName: &configurations.AppName,
 	}, nil
 }
 
-func (r *RedisCache) SetOne(ctx context.Context, key, value string) error {
+func (r *RedisCache) SetOne(ctx context.Context, key, value string, ttl time.Duration) error {
 	_, err := r.Client.Set(ctx, r.prefixKeyWithAppName(key), value, ttl).Result()
 	if err != nil {
 		return fmt.Errorf("Error setting value in cache: %w", err)

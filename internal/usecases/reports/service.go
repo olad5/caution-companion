@@ -24,7 +24,7 @@ func NewReportsService(reportRepo infra.ReportRepository) (*ReportService, error
 }
 
 func (r *ReportService) CreateReport(ctx context.Context, incidentType, longitude, latitude, description string) (domain.Report, error) {
-	incidentTypes := []string{"robbery", "fire", "accident", "cult clash"}
+	incidentTypes := []string{"robbery", "fire", "accident", "cult"}
 
 	isIncidentTypeLegit := false
 	for _, element := range incidentTypes {
@@ -32,7 +32,7 @@ func (r *ReportService) CreateReport(ctx context.Context, incidentType, longitud
 			isIncidentTypeLegit = true
 		}
 	}
-	// TODO:TODO: you have to test this incidentType
+
 	if !isIncidentTypeLegit {
 		return domain.Report{}, ErrInvalidIncidentType
 	}

@@ -26,11 +26,11 @@ var (
 )
 
 const (
-	JWT_HASH_NAME       = "jwt-clients"
-	refreshPrefix       = "refresh-"
-	keyDelimiter        = "--"
-	colonDelimiter      = ":"
-	SessionTTLInMinutes = 10
+	JWT_HASH_NAME           = "jwt-clients"
+	refreshPrefix           = "refresh-"
+	keyDelimiter            = "--"
+	colonDelimiter          = ":"
+	AuthSessionTTLInMinutes = time.Minute * 30
 )
 
 func NewRedisAuthService(ctx context.Context, cache infra.Cache, jwtSecretKey string) (*RedisAuthService, error) {
@@ -53,7 +53,7 @@ func (r *RedisAuthService) GenerateAuthTokens(ctx context.Context, user domain.U
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":   user.ID,
 		"email": user.Email,
-		"exp":   time.Now().Add(time.Minute * SessionTTLInMinutes).Unix(),
+		"exp":   time.Now().Add(AuthSessionTTLInMinutes).Unix(),
 	})
 	accessToken, err := token.SignedString([]byte(r.SecretKey))
 	if err != nil {
@@ -61,7 +61,7 @@ func (r *RedisAuthService) GenerateAuthTokens(ctx context.Context, user domain.U
 	}
 
 	refreshToken := uuid.New().String()
-	err = r.Cache.SetOne(ctx, constructKey(user.ID.String(), refreshToken), accessToken)
+	err = r.Cache.SetOne(ctx, constructKey(user.ID.String(), refreshToken), accessToken, AuthSessionTTLInMinutes)
 	if err != nil {
 		return "", "", ErrGeneratingToken
 	}
