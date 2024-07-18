@@ -27,9 +27,9 @@ func NewPostgresUserRepo(ctx context.Context, connection *sqlx.DB) (*PostgresUse
 func (p *PostgresUserRepository) CreateUser(ctx context.Context, user domain.User) error {
 	const query = `
     INSERT INTO users
-      (id, first_name, last_name, email, password) 
+      (id, first_name, last_name, user_name, email, password, location, phone, created_at, updated_at) 
     VALUES 
-      (:id, :first_name, :last_name, :email, :password)
+    (:id, :first_name, :last_name, :user_name, :email, :password, :location, :phone, :created_at, :updated_at)
   `
 
 	_, err := p.connection.NamedExec(query, toSqlxUser(user))
@@ -37,6 +37,43 @@ func (p *PostgresUserRepository) CreateUser(ctx context.Context, user domain.Use
 		return fmt.Errorf("error creating user in the db: %w", err)
 	}
 	return nil
+}
+
+func (p *PostgresUserRepository) UpdateUser(ctx context.Context, user domain.User) error {
+	const query = `
+  UPDATE  
+    users 
+	SET
+		"first_name" = :first_name,
+		"last_name" = :last_name,
+		"email" = :email,
+		"password" = :password,
+		"location" = :location,
+		"phone" = :phone,
+		"created_at" = :created_at,
+		"updated_at" = :updated_at
+  WHERE 
+      id=:id
+  `
+
+	_, err := p.connection.NamedExec(query, toSqlxUser(user))
+	if err != nil {
+		return fmt.Errorf("error updating user in the db: %w", err)
+	}
+	return nil
+}
+
+func (p *PostgresUserRepository) GetUserByUserName(ctx context.Context, userName string) (domain.User, error) {
+	var user SqlxUser
+
+	err := p.connection.Get(&user, "SELECT * FROM users WHERE user_name = $1", userName)
+	if err != nil {
+		if errors.Is(err, ErrRecordNotFound) {
+			return domain.User{}, infra.ErrUserNotFound
+		}
+		return domain.User{}, fmt.Errorf("error getting user by userName: %w", err)
+	}
+	return toUser(user), nil
 }
 
 func (p *PostgresUserRepository) GetUserByEmail(ctx context.Context, userEmail string) (domain.User, error) {
@@ -77,7 +114,10 @@ type SqlxUser struct {
 	Email     string    `db:"email"`
 	FirstName string    `db:"first_name"`
 	LastName  string    `db:"last_name"`
+	UserName  string    `db:"user_name"`
 	Password  string    `db:"password"`
+	Location  string    `db:"location"`
+	Phone     string    `db:"phone"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
@@ -88,7 +128,10 @@ func toUser(u SqlxUser) domain.User {
 		Email:     u.Email,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
+		UserName:  u.UserName,
 		Password:  u.Password,
+		Location:  u.Location,
+		Phone:     u.Phone,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}
@@ -100,7 +143,10 @@ func toSqlxUser(u domain.User) SqlxUser {
 		Email:     u.Email,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
+		UserName:  u.UserName,
 		Password:  u.Password,
+		Location:  u.Location,
+		Phone:     u.Phone,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}

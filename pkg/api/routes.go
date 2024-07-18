@@ -112,6 +112,7 @@ func NewHttpRouter(
 		)
 		r.Use(authMiddleware.EnsureAuthenticated(authService))
 
+		r.Put("/users", userHandler.EditUser)
 		r.Get("/users/me", userHandler.GetLoggedInUser)
 	})
 

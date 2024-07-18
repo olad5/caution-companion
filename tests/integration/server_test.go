@@ -270,29 +270,52 @@ func TestRefreshToken(t *testing.T) {
 	)
 }
 
-func TestCreatReport(t *testing.T) {
-	route := "/reports"
-	t.Run("test for invalid json request body",
+func TestEditUserProfile(t *testing.T) {
+	route := "/users"
+	t.Run(`Given a user tries to update their profile with valid data, when they 
+    submit the changes, the profile is updated successfully and they receive a 
+    confirmation message. `,
 		func(t *testing.T) {
-			t.Skip()
-			// TODO:TODO: fix this bit later
-			req, _ := http.NewRequest(http.MethodPost, route, nil)
+			firstName := "mike"
+			lastName := "fisher"
+			email := lastName + fmt.Sprint(tests.GenerateUniqueId()) + "@gmail.com"
+			password := "some-random-password"
+			createUser(t, firstName, lastName, email, password)
+			ac, _ := logUserIn(t, email, password)
+
+			newEmail := lastName + fmt.Sprint(tests.GenerateUniqueId()) + "@gmail.com"
+			newFirstName := "michael"
+			newLocation := "south bay"
+			newUserName := "iamfisher"
+			phone := "08093487904"
+			requestBody := []byte(fmt.Sprintf(`{
+      "email": "%s",
+      "first_name": "%s",
+      "last_name": "%s",
+      "user_name": "%s",
+      "location": "%s",
+      "phone": "%s"
+      }`, newEmail, newFirstName, lastName, newUserName, newLocation, phone))
+			req, _ := http.NewRequest(http.MethodPut, route, bytes.NewBuffer(requestBody))
+			req.Header.Set("Authorization", "Bearer "+ac)
 			response := tests.ExecuteRequest(req, appRouter)
-			tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
+			tests.AssertStatusCode(t, http.StatusOK, response.Code)
+			message := tests.ParseResponse(t, response)["message"].(string)
+			tests.AssertResponseMessage(t, message, "user profile updated successfully")
+
+			ac, _ = logUserIn(t, newEmail, password)
+			user := getCurrentUser(t, ac)
+			tests.AssertResponseMessage(t, user["email"].(string), newEmail)
+			tests.AssertResponseMessage(t, user["first_name"].(string), newFirstName)
+			tests.AssertResponseMessage(t, user["last_name"].(string), lastName)
+			tests.AssertResponseMessage(t, user["location"].(string), newLocation)
+			tests.AssertResponseMessage(t, user["phone"].(string), phone)
 		},
 	)
-	// TODO:TODO: i might need to test this
-	// t.Run("test for undefined email address in request body",
-	// 	func(t *testing.T) {
-	// 		requestBody := []byte(fmt.Sprintf(`{
-	// "email": "%v",
-	// "password": "%v"
-	// }`, nil, nil))
-	// 		req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
-	// 		response := tests.ExecuteRequest(req, appRouter)
-	// 		tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
-	// 	},
-	// )
+}
+
+func TestCreatReport(t *testing.T) {
+	route := "/reports"
 	t.Run(` Given a user wants to create an emergency report, when they submit all 
     the required information correctly, then the report is created successfully 
     and a confirmation message is sent back to the user.

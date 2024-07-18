@@ -77,6 +77,10 @@ func (r *RedisAuthService) getKeysTiedToAUserId(ctx context.Context, userId stri
 	return results, nil
 }
 
+func (r *RedisAuthService) LogUserOut(ctx context.Context, userId string) error {
+	return r.deleteTokensTiedToUserId(ctx, userId)
+}
+
 func (r *RedisAuthService) GetUserIdFromRefreshToken(ctx context.Context, refreshToken string) (uuid.UUID, error) {
 	match := "*" + refreshPrefix + refreshToken + ":*"
 	results, err := r.Cache.GetAllKeysUsingWildCard(ctx, match)
