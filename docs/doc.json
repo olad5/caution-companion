@@ -88,6 +88,43 @@
             }
           }
         }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Edit a User Profile.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCurrentUserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "user_name Already Exists | Client Error | Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/users/login": {
@@ -640,9 +677,30 @@
               "last_name": {
                 "type": "string",
                 "minLength": 1
+              },
+              "user_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "location": {
+                "type": "string",
+                "minLength": 1
+              },
+              "phone": {
+                "type": "string",
+                "minLength": 1
               }
             },
-            "required": ["id", "email", "first_name", "last_name"]
+            "required": [
+              "id",
+              "email",
+              "first_name",
+              "last_name",
+
+              "user_name",
+              "location",
+              "phone"
+            ]
           }
         },
         "required": ["status", "message", "data"]
@@ -670,6 +728,46 @@
           "password": "secret-password",
           "first_name": "susan",
           "last_name": "rice"
+        }
+      },
+      "EditUserRequest": {
+        "title": "EditUserRequest",
+        "required": [
+          "email",
+          "first_name",
+          "last_name",
+          "user_name",
+          "location",
+          "phone"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        },
+        "example": {
+          "email": "susanrice@gmail.com",
+          "first_name": "susan",
+          "last_name": "rice",
+          "user_name": "susanbaby",
+          "location": "south bay",
+          "phone": "08093487904"
         }
       },
       "LoginUserRequest": {

@@ -47,6 +47,7 @@ func (p *PostgresUserRepository) UpdateUser(ctx context.Context, user domain.Use
 		"first_name" = :first_name,
 		"last_name" = :last_name,
 		"email" = :email,
+		"user_name" = :user_name,
 		"password" = :password,
 		"location" = :location,
 		"phone" = :phone,

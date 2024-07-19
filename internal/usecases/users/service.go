@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/olad5/caution-companion/internal/domain"
@@ -97,6 +98,8 @@ func (u *UserService) EditUser(ctx context.Context, firstName, lastName, userNam
 		Password:  existingUser.Password,
 		Location:  location,
 		Phone:     phone,
+		CreatedAt: existingUser.CreatedAt,
+		UpdatedAt: time.Now(),
 	}
 
 	err = u.userRepo.UpdateUser(ctx, updatedUser)
