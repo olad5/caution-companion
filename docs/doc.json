@@ -740,6 +740,10 @@
                 "type": "string",
                 "minLength": 1
               },
+              "avatar": {
+                "type": "string",
+                "minLength": 1
+              },
               "email": {
                 "type": "string",
                 "minLength": 1
@@ -770,7 +774,7 @@
               "email",
               "first_name",
               "last_name",
-
+              "avatar",
               "user_name",
               "location",
               "phone"
@@ -808,6 +812,7 @@
         "title": "EditUserRequest",
         "required": [
           "email",
+          "avatar",
           "first_name",
           "last_name",
           "user_name",
@@ -816,6 +821,9 @@
         ],
         "type": "object",
         "properties": {
+          "avatar": {
+            "type": "string"
+          },
           "email": {
             "type": "string"
           },
@@ -837,6 +845,7 @@
         },
         "example": {
           "email": "susanrice@gmail.com",
+          "avatar": "https://res.cloudinary.com/deda4nfxl/image/upload/v1721582769/caution-companion/caution-companion/avatarse92cc577cc2e431e97a512ebef552d02.jpg",
           "first_name": "susan",
           "last_name": "rice",
           "user_name": "susanbaby",

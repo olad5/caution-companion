@@ -7,6 +7,7 @@ import (
 type UserDTO struct {
 	ID        string `json:"id"`
 	Email     string `json:"email"`
+	Avatar    string `json:"avatar"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	UserName  string `json:"user_name"`
@@ -18,6 +19,7 @@ func ToUserDTO(user domain.User) UserDTO {
 	return UserDTO{
 		ID:        user.ID.String(),
 		Email:     user.Email,
+		Avatar:    user.AvatarUrl,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		UserName:  user.UserName,

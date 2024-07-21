@@ -9,6 +9,7 @@ import (
 type User struct {
 	ID        uuid.UUID
 	Email     string
+	AvatarUrl string
 	FirstName string
 	LastName  string
 	UserName  string

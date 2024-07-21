@@ -26,7 +26,7 @@ func NewCloudinaryFileStore(ctx context.Context, cfg *config.Configurations) (*C
 
 func (c *CloudinaryFileStore) SaveToFileStore(ctx context.Context, filename string, file io.Reader) (string, error) {
 	resp, err := c.cld.Upload.Upload(ctx, file, uploader.UploadParams{
-		PublicID:         "caution-companion" + "/avatars" + filename,
+		PublicID:         "caution-companion" + "/avatars/" + filename,
 		FilenameOverride: filename,
 		Folder:           "caution-companion",
 		UniqueFilename:   api.Bool(false),

@@ -19,6 +19,7 @@ func (u UserHandler) EditUser(w http.ResponseWriter, r *http.Request) {
 
 	type requestDTO struct {
 		Email     string `json:"email" validate:"required,email"`
+		Avatar    string `json:"avatar" validate:"required,http_url"`
 		FirstName string `json:"first_name" validate:"required,alpha"`
 		LastName  string `json:"last_name" validate:"required,alpha"`
 		UserName  string `json:"user_name" validate:"required,lte=12"`
@@ -44,6 +45,7 @@ func (u UserHandler) EditUser(w http.ResponseWriter, r *http.Request) {
 		request.LastName,
 		request.UserName,
 		request.Email,
+		request.Avatar,
 		request.Location,
 		request.Phone)
 	if err != nil {

@@ -31,7 +31,7 @@ func (f FilesHandler) Upload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	response.SuccessResponse(w, "user logged in successfully",
+	response.SuccessResponse(w, "file uploaded successfully",
 		map[string]interface{}{
 			"url": url,
 		},

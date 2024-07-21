@@ -27,9 +27,9 @@ func NewPostgresUserRepo(ctx context.Context, connection *sqlx.DB) (*PostgresUse
 func (p *PostgresUserRepository) CreateUser(ctx context.Context, user domain.User) error {
 	const query = `
     INSERT INTO users
-      (id, first_name, last_name, user_name, email, password, location, phone, created_at, updated_at) 
+      (id, first_name, last_name, user_name, email, password, avatar_url, location, phone, created_at, updated_at) 
     VALUES 
-    (:id, :first_name, :last_name, :user_name, :email, :password, :location, :phone, :created_at, :updated_at)
+    (:id, :first_name, :last_name, :user_name, :email, :password, :avatar_url, :location, :phone, :created_at, :updated_at)
   `
 
 	_, err := p.connection.NamedExec(query, toSqlxUser(user))
@@ -48,6 +48,7 @@ func (p *PostgresUserRepository) UpdateUser(ctx context.Context, user domain.Use
 		"last_name" = :last_name,
 		"email" = :email,
 		"user_name" = :user_name,
+		"avatar_url" = :avatar_url,
 		"password" = :password,
 		"location" = :location,
 		"phone" = :phone,
@@ -113,6 +114,7 @@ func (p *PostgresUserRepository) Ping(ctx context.Context) error {
 type SqlxUser struct {
 	ID        uuid.UUID `db:"id"`
 	Email     string    `db:"email"`
+	AvatarUrl string    `db:"avatar_url"`
 	FirstName string    `db:"first_name"`
 	LastName  string    `db:"last_name"`
 	UserName  string    `db:"user_name"`
@@ -126,6 +128,7 @@ type SqlxUser struct {
 func toUser(u SqlxUser) domain.User {
 	return domain.User{
 		ID:        u.ID,
+		AvatarUrl: u.AvatarUrl,
 		Email:     u.Email,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,
@@ -141,6 +144,7 @@ func toUser(u SqlxUser) domain.User {
 func toSqlxUser(u domain.User) SqlxUser {
 	return SqlxUser{
 		ID:        u.ID,
+		AvatarUrl: u.AvatarUrl,
 		Email:     u.Email,
 		FirstName: u.FirstName,
 		LastName:  u.LastName,

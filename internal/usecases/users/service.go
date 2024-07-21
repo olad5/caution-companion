@@ -28,6 +28,8 @@ var (
 	ErrInvalidToken          = errors.New("invalid token")
 )
 
+const DEFAULT_AVATAR = "https://res.cloudinary.com/deda4nfxl/image/upload/v1721583338/caution-companion/caution-companion/avatars/4608bc1b98c84a06838fafb5e38fb552.jpg"
+
 func NewUserService(userRepo infra.UserRepository, authService auth.AuthService) (*UserService, error) {
 	if userRepo == nil {
 		return &UserService{}, errors.New("UserService failed to initialize, userRepo is nil")
@@ -52,6 +54,7 @@ func (u *UserService) CreateUser(ctx context.Context, firstName, lastName, email
 	newUser := domain.User{
 		ID:        uuid.New(),
 		Email:     strings.ToLower(email),
+		AvatarUrl: DEFAULT_AVATAR,
 		FirstName: strings.ToLower(firstName),
 		LastName:  strings.ToLower(lastName),
 		UserName:  createDefaultUserName(firstName, lastName),
@@ -65,7 +68,7 @@ func (u *UserService) CreateUser(ctx context.Context, firstName, lastName, email
 	return newUser, nil
 }
 
-func (u *UserService) EditUser(ctx context.Context, firstName, lastName, userName, email, location, phone string) (domain.User, error) {
+func (u *UserService) EditUser(ctx context.Context, firstName, lastName, userName, email, avatarUrl, location, phone string) (domain.User, error) {
 	jwtClaims, ok := auth.GetJWTClaims(ctx)
 	if !ok {
 		return domain.User{}, fmt.Errorf("error parsing JWTClaims: %v", ErrInvalidToken)
@@ -92,6 +95,7 @@ func (u *UserService) EditUser(ctx context.Context, firstName, lastName, userNam
 	updatedUser := domain.User{
 		ID:        existingUser.ID,
 		Email:     email,
+		AvatarUrl: avatarUrl,
 		FirstName: strings.ToLower(firstName),
 		LastName:  strings.ToLower(lastName),
 		UserName:  userName,
