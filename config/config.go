@@ -18,6 +18,7 @@ type Configurations struct {
 	AuthSessionTTLInMinutes int
 	LogLevel                string
 	Environment             string
+	CloudinaryUrl           string
 }
 
 func GetConfig(filepath string) *Configurations {
@@ -41,6 +42,7 @@ func GetConfig(filepath string) *Configurations {
 		CacheAddress:            os.Getenv("REDIS_URL"),
 		LogLevel:                os.Getenv("LOG_LEVEL"),
 		AppName:                 os.Getenv("APP_NAME"),
+		CloudinaryUrl:           os.Getenv("CLOUDINARY_URL"),
 		AuthSessionTTLInMinutes: authSessionTTLInMinutes,
 		Environment:             environment,
 	}

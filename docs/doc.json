@@ -408,6 +408,54 @@
           }
         }
       }
+    },
+    "/files/upload": {
+      "post": {
+        "tags": ["Files"],
+        "summary": "Uploads a file",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "file",
+            "type": "file",
+            "required": true,
+            "description": "The file to upload"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFileResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -541,6 +589,32 @@
           "data": {
             "type": "object",
             "$ref": "#/components/schemas/SingleReportResponse"
+          }
+        },
+        "required": ["status", "message", "data"]
+      },
+      "UploadFileResponse": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "description": "",
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": ["url"],
+            "example": {
+              "url": "https://res.cloudinary.com/will/image/upload/v1713355576/caution-companion/image_14_c3q1lj.png"
+            }
           }
         },
         "required": ["status", "message", "data"]

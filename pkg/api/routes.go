@@ -11,10 +11,12 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/olad5/caution-companion/config"
 	authMiddleware "github.com/olad5/caution-companion/internal/handlers/auth"
+	fileHandlers "github.com/olad5/caution-companion/internal/handlers/files"
 	reportsHandlers "github.com/olad5/caution-companion/internal/handlers/reports"
 	userHandlers "github.com/olad5/caution-companion/internal/handlers/users"
 	"github.com/olad5/caution-companion/internal/infra"
 	"github.com/olad5/caution-companion/internal/services/auth"
+	"github.com/olad5/caution-companion/internal/usecases/files"
 	"github.com/olad5/caution-companion/internal/usecases/reports"
 	"github.com/olad5/caution-companion/internal/usecases/users"
 	response "github.com/olad5/caution-companion/pkg/utils"
@@ -26,6 +28,7 @@ func NewHttpRouter(
 	ctx context.Context,
 	userRepo infra.UserRepository,
 	reportsRepo infra.ReportRepository,
+	fileStore infra.FileStore,
 	cache infra.Cache,
 	configurations *config.Configurations,
 	l *zap.Logger,
@@ -49,6 +52,15 @@ func NewHttpRouter(
 		log.Fatal("Error Initializing UserService")
 	}
 	reportsHandler, err := reportsHandlers.NewReportsHandler(*reportsService, l)
+	if err != nil {
+		log.Fatal("failed to create the Report handler: ", err)
+	}
+
+	filesService, err := files.NewFileService(fileStore)
+	if err != nil {
+		log.Fatal("Error Initializing FilesService")
+	}
+	filesHandler, err := fileHandlers.NewFilesHandler(*filesService, l)
 	if err != nil {
 		log.Fatal("failed to create the User handler: ", err)
 	}
@@ -126,6 +138,13 @@ func NewHttpRouter(
 		r.Post("/reports", reportsHandler.CreateReport)
 		r.Get("/reports/{id}", reportsHandler.GetReportByReportId)
 		r.Get("/reports/latest", reportsHandler.GetLatestReports)
+	})
+
+	router.Group(func(r chi.Router) {
+		r.Use(middleware.AllowContentType("multipart/form-data"))
+		r.Use(authMiddleware.EnsureAuthenticated(authService))
+
+		r.Post("/files/upload", filesHandler.Upload)
 	})
 
 	return router

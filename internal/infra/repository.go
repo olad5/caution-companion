@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"errors"
+	"io"
 
 	"github.com/google/uuid"
 	"github.com/olad5/caution-companion/internal/domain"
@@ -27,4 +28,8 @@ type ReportRepository interface {
 	GetReportsByUserId(ctx context.Context, userId uuid.UUID, pageNumber, rowsPerPage int) ([]domain.Report, error)
 	GetLatestReports(ctx context.Context, pageNumber, rowsPerPage int) ([]domain.Report, error)
 	GetReportByReportId(ctx context.Context, reportId uuid.UUID) (domain.Report, error)
+}
+
+type FileStore interface {
+	SaveToFileStore(ctx context.Context, filename string, file io.Reader) (string, error)
 }

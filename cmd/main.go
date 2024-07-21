@@ -13,6 +13,7 @@ import (
 	"github.com/olad5/caution-companion/config"
 	"github.com/olad5/caution-companion/config/data"
 	loggingMiddleware "github.com/olad5/caution-companion/internal/handlers/logging"
+	"github.com/olad5/caution-companion/internal/infra/cloudinary"
 	"github.com/olad5/caution-companion/internal/infra/postgres"
 	"github.com/olad5/caution-companion/internal/infra/redis"
 	"github.com/olad5/caution-companion/pkg/api"
@@ -47,7 +48,12 @@ func main() {
 		log.Fatal("Error Initializing redisCache", err)
 	}
 
-	appRouter := api.NewHttpRouter(ctx, userRepo, reportsRepo, redisCache, configurations, l)
+	fileStore, err := cloudinary.NewCloudinaryFileStore(ctx, configurations)
+	if err != nil {
+		log.Fatal("Error Initializing fileStore", err)
+	}
+
+	appRouter := api.NewHttpRouter(ctx, userRepo, reportsRepo, fileStore, redisCache, configurations, l)
 
 	port := configurations.Port
 	server := &http.Server{Addr: ":" + port, Handler: loggingMiddleware.RequestLogger(appRouter, configurations)}
