@@ -3,6 +3,7 @@ module github.com/olad5/caution-companion
 go 1.20
 
 require (
+	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
 	github.com/go-playground/locales v0.14.1
@@ -20,7 +21,6 @@ require (
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/creasty/defaults v1.5.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect
@@ -45,6 +45,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/h2non/filetype v1.1.3
 	github.com/klauspost/compress v1.17.2 // indirect
 	github.com/lib/pq v1.10.9
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect

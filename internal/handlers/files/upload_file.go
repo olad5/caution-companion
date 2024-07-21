@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
+	files "github.com/olad5/caution-companion/internal/usecases/files"
 	response "github.com/olad5/caution-companion/pkg/utils"
 )
 
@@ -26,12 +28,15 @@ func (f FilesHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	url, err := f.fileService.UploadFile(ctx, file)
 	if err != nil {
 		switch {
+		case errors.Is(err, files.ErrInvalidFileType):
+			response.ErrorResponse(w, "file is not an image", http.StatusBadRequest)
+			return
 		default:
 			response.InternalServerErrorResponse(w, err, f.logger)
 			return
 		}
 	}
-	response.SuccessResponse(w, "file uploaded successfully",
+	response.SuccessResponse(w, "image uploaded successfully",
 		map[string]interface{}{
 			"url": url,
 		},
