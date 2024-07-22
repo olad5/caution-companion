@@ -16,6 +16,7 @@ import (
 	"github.com/olad5/caution-companion/internal/infra/cloudinary"
 	"github.com/olad5/caution-companion/internal/infra/postgres"
 	"github.com/olad5/caution-companion/internal/infra/redis"
+	"github.com/olad5/caution-companion/internal/infra/smtpexpress"
 	"github.com/olad5/caution-companion/pkg/api"
 	"github.com/olad5/caution-companion/pkg/utils/logger"
 )
@@ -53,7 +54,20 @@ func main() {
 		log.Fatal("Error Initializing fileStore", err)
 	}
 
-	appRouter := api.NewHttpRouter(ctx, userRepo, reportsRepo, fileStore, redisCache, configurations, l)
+	mailService, err := smtpexpress.New(ctx, configurations)
+	if err != nil {
+		log.Fatal("Error Initializing smtpexpress mailservice", err)
+	}
+
+	appRouter := api.NewHttpRouter(
+		ctx,
+		userRepo,
+		reportsRepo,
+		fileStore,
+		redisCache,
+		mailService,
+		configurations,
+		l)
 
 	port := configurations.Port
 	server := &http.Server{Addr: ":" + port, Handler: loggingMiddleware.RequestLogger(appRouter, configurations)}

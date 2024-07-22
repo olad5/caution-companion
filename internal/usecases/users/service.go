@@ -19,6 +19,7 @@ import (
 type UserService struct {
 	userRepo    infra.UserRepository
 	authService auth.AuthService
+	mailService infra.MailService
 }
 
 var (
@@ -30,14 +31,21 @@ var (
 
 const DEFAULT_AVATAR = "https://res.cloudinary.com/deda4nfxl/image/upload/v1721583338/caution-companion/caution-companion/avatars/4608bc1b98c84a06838fafb5e38fb552.jpg"
 
-func NewUserService(userRepo infra.UserRepository, authService auth.AuthService) (*UserService, error) {
+func NewUserService(
+	userRepo infra.UserRepository,
+	authService auth.AuthService,
+	mailService infra.MailService,
+) (*UserService, error) {
 	if userRepo == nil {
 		return &UserService{}, errors.New("UserService failed to initialize, userRepo is nil")
 	}
 	if authService == nil {
 		return &UserService{}, errors.New("UserService failed to initialize, authService is nil")
 	}
-	return &UserService{userRepo, authService}, nil
+	if mailService == nil {
+		return &UserService{}, errors.New("UserService failed to initialize, mailService is nil")
+	}
+	return &UserService{userRepo, authService, mailService}, nil
 }
 
 func (u *UserService) CreateUser(ctx context.Context, firstName, lastName, email, password string) (domain.User, error) {
@@ -152,6 +160,62 @@ func (u *UserService) LogUserOut(ctx context.Context) error {
 	userId := jwtClaims.ID
 
 	return u.authService.LogUserOut(ctx, userId.String())
+}
+
+func (u *UserService) ForgotPassword(ctx context.Context, email string) error {
+	existingUser, err := u.userRepo.GetUserByEmail(ctx, email)
+	if err != nil {
+		return err
+	}
+
+	otp := getRandomIntString(6)
+	opts := infra.MailOptions{
+		To:      existingUser.Email,
+		Subject: "forgot password",
+		Body:    "otp, expires in 10 min:  " + otp,
+	}
+	err = u.authService.AddPasswordResetTokenToCache(ctx, existingUser.ID, otp)
+	if err != nil {
+		// TODO:TODO: i need to log stuff
+		return err
+	}
+	err = u.mailService.Send(ctx, opts)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserService) ResetPassword(ctx context.Context, token, newPassword string) error {
+	id, err := u.authService.GetUserIdFromPasswordResetToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	userId, err := uuid.Parse(id)
+	if err != nil {
+		return ErrInvalidToken
+	}
+
+	existingUser, err := u.userRepo.GetUserByUserId(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	hashedPassword, err := hashAndSalt([]byte(newPassword))
+	if err != nil {
+		return err
+	}
+
+	existingUser.Password = hashedPassword
+	existingUser.UpdatedAt = time.Now()
+	err = u.userRepo.UpdateUser(ctx, existingUser)
+	if err != nil {
+		return err
+	}
+
+	return u.authService.DeletePasswordResetToken(ctx, token)
 }
 
 func (u *UserService) RefreshUserAccessToken(ctx context.Context, existingRefreshToken string) (string, string, error) {

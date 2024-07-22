@@ -15,11 +15,17 @@
       "description": "Local Development server (uses test data)"
     }
   ],
-  "security": [{ "bearerAuth": [] }],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
   "paths": {
     "/health": {
       "get": {
-        "tags": ["Health"],
+        "tags": [
+          "Health"
+        ],
         "summary": "Returns the Health of the Server",
         "security": [],
         "responses": {
@@ -52,7 +58,9 @@
     },
     "/users": {
       "post": {
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "summary": "Creates a new User.",
         "requestBody": {
           "description": "",
@@ -90,7 +98,9 @@
         }
       },
       "put": {
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "summary": "Edit a User Profile.",
         "requestBody": {
           "description": "",
@@ -129,7 +139,9 @@
     },
     "/users/login": {
       "post": {
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "summary": "Login User In.",
         "parameters": [],
         "requestBody": {
@@ -195,9 +207,155 @@
         }
       }
     },
+    "/users/forgot-password": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Forgot Password",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "",
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "email",
+                    "minLength": 1
+                  }
+                }
+              },
+              "example": {
+                "email": "susanrice@gmail.com"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                "example": {
+                  "status": true,
+                  "message": "reset password email sent successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User Not Found | Client Error | Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/reset-password": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Reset Password",
+        "parameters": [],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "",
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "confirm_password": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "example": {
+                "token": "829128",
+                "password": "secret-password",
+                "confirm_password": "secret-password"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "description": "",
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                "example": {
+                  "status": true,
+                  "message": "password reset successfully"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User Not Found | Client Error | Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users/me": {
       "get": {
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "summary": "Get Current User",
         "responses": {
           "200": {
@@ -245,7 +403,9 @@
     },
     "/reports": {
       "post": {
-        "tags": ["Reports"],
+        "tags": [
+          "Reports"
+        ],
         "summary": "Creates an Emergency Report ",
         "requestBody": {
           "description": "",
@@ -304,7 +464,9 @@
     },
     "/reports/latest": {
       "get": {
-        "tags": ["Reports"],
+        "tags": [
+          "Reports"
+        ],
         "summary": "Get latest Emergency Reports ",
         "responses": {
           "200": {
@@ -352,7 +514,9 @@
     },
     "/reports/{id}": {
       "get": {
-        "tags": ["Reports"],
+        "tags": [
+          "Reports"
+        ],
         "summary": "Returns an Emergency Report by id ",
         "parameters": [
           {
@@ -411,9 +575,13 @@
     },
     "/files/upload": {
       "post": {
-        "tags": ["Files"],
+        "tags": [
+          "Files"
+        ],
         "summary": "Uploads a file",
-        "consumes": ["multipart/form-data"],
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "in": "formData",
@@ -544,7 +712,10 @@
                 "type": "string"
               }
             },
-            "required": ["longitude", "latitude"]
+            "required": [
+              "longitude",
+              "latitude"
+            ]
           },
           "description": {
             "type": "string"
@@ -591,7 +762,11 @@
             "$ref": "#/components/schemas/SingleReportResponse"
           }
         },
-        "required": ["status", "message", "data"]
+        "required": [
+          "status",
+          "message",
+          "data"
+        ]
       },
       "UploadFileResponse": {
         "description": "",
@@ -611,13 +786,19 @@
                 "type": "string"
               }
             },
-            "required": ["url"],
+            "required": [
+              "url"
+            ],
             "example": {
               "url": "https://res.cloudinary.com/will/image/upload/v1713355576/caution-companion/image_14_c3q1lj.png"
             }
           }
         },
-        "required": ["status", "message", "data"]
+        "required": [
+          "status",
+          "message",
+          "data"
+        ]
       },
       "GetLatestReportsResponse": {
         "description": "",
@@ -646,7 +827,11 @@
                 }
               }
             },
-            "required": ["rows", "page", "items"],
+            "required": [
+              "rows",
+              "page",
+              "items"
+            ],
             "example": {
               "rows": 1,
               "page": 1,
@@ -666,9 +851,12 @@
             }
           }
         },
-        "required": ["status", "message", "data"]
+        "required": [
+          "status",
+          "message",
+          "data"
+        ]
       },
-
       "CreateNewReportRequest": {
         "description": "",
         "type": "object",
@@ -686,13 +874,20 @@
                 "type": "string"
               }
             },
-            "required": ["longitude", "latitude"]
+            "required": [
+              "longitude",
+              "latitude"
+            ]
           },
           "description": {
             "type": "string"
           }
         },
-        "required": ["incident_type", "location", "description"],
+        "required": [
+          "incident_type",
+          "location",
+          "description"
+        ],
         "example": {
           "incident_type": "robbery",
           "location": {
@@ -715,7 +910,10 @@
             "minLength": 1
           }
         },
-        "required": ["status", "message"],
+        "required": [
+          "status",
+          "message"
+        ],
         "example": {
           "status": true,
           "message": "server is healthy"
@@ -781,11 +979,20 @@
             ]
           }
         },
-        "required": ["status", "message", "data"]
+        "required": [
+          "status",
+          "message",
+          "data"
+        ]
       },
       "RegisterUserRequest": {
         "title": "RegisterUserRequest",
-        "required": ["email", "password", "first_name", "last_name"],
+        "required": [
+          "email",
+          "password",
+          "first_name",
+          "last_name"
+        ],
         "type": "object",
         "properties": {
           "email": {
@@ -855,7 +1062,10 @@
       },
       "LoginUserRequest": {
         "title": "LoginUserRequest",
-        "required": ["email", "password"],
+        "required": [
+          "email",
+          "password"
+        ],
         "type": "object",
         "properties": {
           "email": {

@@ -30,6 +30,7 @@ func NewHttpRouter(
 	reportsRepo infra.ReportRepository,
 	fileStore infra.FileStore,
 	cache infra.Cache,
+	mailService infra.MailService,
 	configurations *config.Configurations,
 	l *zap.Logger,
 ) http.Handler {
@@ -38,7 +39,7 @@ func NewHttpRouter(
 		log.Fatal("Error Initializing Auth Service", err)
 	}
 
-	userService, err := users.NewUserService(userRepo, authService)
+	userService, err := users.NewUserService(userRepo, authService, mailService)
 	if err != nil {
 		log.Fatal("Error Initializing UserService")
 	}
@@ -105,6 +106,7 @@ func NewHttpRouter(
 	})
 
 	// -------------------------------------------------------------------------
+	// TODO:TODO: add prefixes to these routes
 	router.Group(func(r chi.Router) {
 		r.Use(
 			middleware.AllowContentType("application/json"),
@@ -113,6 +115,8 @@ func NewHttpRouter(
 		r.Post("/users", userHandler.CreateUser)
 		r.Post("/users/login", userHandler.Login)
 		r.Post("/users/token/refresh", userHandler.RefreshAccessToken)
+		r.Post("/users/forgot-password", userHandler.ForgotPassword)
+		r.Post("/users/reset-password", userHandler.ResetPassword)
 	})
 
 	// -------------------------------------------------------------------------

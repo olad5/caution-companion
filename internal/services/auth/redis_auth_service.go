@@ -19,18 +19,23 @@ type RedisAuthService struct {
 }
 
 var (
-	ErrInvalidToken    = errors.New("invalid token")
-	ErrExpiredToken    = errors.New("expired token")
-	ErrGeneratingToken = errors.New("Error generating JWT token")
-	ErrDecodingToken   = errors.New("error decoding JWT token")
+	ErrInvalidToken                 = errors.New("invalid token")
+	ErrExpiredToken                 = errors.New("expired token")
+	ErrGeneratingToken              = errors.New("Error generating JWT token")
+	ErrGeneratingPasswordResetToken = errors.New("Error generating password reset token")
+	ErrRetrievingPasswordResetToken = errors.New("Error retreiving password reset token")
+	ErrDeletingPasswordResetToken   = errors.New("Error deleting password reset token")
+	ErrDecodingToken                = errors.New("error decoding JWT token")
 )
 
 const (
 	JWT_HASH_NAME           = "jwt-clients"
 	refreshPrefix           = "refresh-"
+	resetPrefix             = "reset-"
 	keyDelimiter            = "--"
 	colonDelimiter          = ":"
 	AuthSessionTTLInMinutes = time.Minute * 30
+	ResetTTLInMinutes       = time.Minute * 10
 )
 
 func NewRedisAuthService(ctx context.Context, cache infra.Cache, jwtSecretKey string) (*RedisAuthService, error) {
@@ -201,6 +206,33 @@ func (r *RedisAuthService) DecodeJWT(ctx context.Context, authHeader string) (JW
 	return JWTClaims{}, ErrInvalidToken
 }
 
+func (r *RedisAuthService) AddPasswordResetTokenToCache(
+	ctx context.Context, userId uuid.UUID, token string,
+) error {
+	err := r.Cache.SetOne(ctx, constructPasswordResetKey(token), userId.String(), ResetTTLInMinutes)
+	if err != nil {
+		return ErrGeneratingPasswordResetToken
+	}
+	return nil
+}
+
+func (r *RedisAuthService) GetUserIdFromPasswordResetToken(ctx context.Context, token string) (string, error) {
+	// TODO:TODO: I need a logger here, things can go wrong
+	token, err := r.Cache.GetOne(ctx, constructPasswordResetKey(token))
+	if err != nil {
+		return "", ErrRetrievingPasswordResetToken
+	}
+	return token, nil
+}
+
+func (r *RedisAuthService) DeletePasswordResetToken(ctx context.Context, token string) error {
+	err := r.Cache.DeleteOne(ctx, constructPasswordResetKey(token))
+	if err != nil {
+		return ErrDeletingPasswordResetToken
+	}
+	return nil
+}
+
 func (r *RedisAuthService) IsUserLoggedIn(ctx context.Context, authHeader, userId string) bool {
 	existingAccesstoken := strings.Split(authHeader, " ")[1]
 	cachedAccessToken, _, err := r.extractTokensFromExistingValueInCache(ctx, userId)
@@ -212,4 +244,8 @@ func (r *RedisAuthService) IsUserLoggedIn(ctx context.Context, authHeader, userI
 
 func constructKey(userId, refreshToken string) string {
 	return refreshPrefix + refreshToken + colonDelimiter + JWT_HASH_NAME + keyDelimiter + userId
+}
+
+func constructPasswordResetKey(token string) string {
+	return resetPrefix + token
 }

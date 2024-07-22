@@ -9,16 +9,18 @@ import (
 )
 
 type Configurations struct {
-	DatabaseUrl             string
-	DatabaseName            string
-	Port                    string
-	JwtSecretKey            string
-	AppName                 string
-	CacheAddress            string
-	AuthSessionTTLInMinutes int
-	LogLevel                string
-	Environment             string
-	CloudinaryUrl           string
+	DatabaseUrl              string
+	DatabaseName             string
+	Port                     string
+	JwtSecretKey             string
+	AppName                  string
+	CacheAddress             string
+	AuthSessionTTLInMinutes  int
+	LogLevel                 string
+	Environment              string
+	CloudinaryUrl            string
+	SenderEmail              string
+	SMTPExpressProjectSecret string
 }
 
 func GetConfig(filepath string) *Configurations {
@@ -35,16 +37,18 @@ func GetConfig(filepath string) *Configurations {
 	}
 
 	configurations := Configurations{
-		DatabaseUrl:             os.Getenv("DATABASE_URL"),
-		DatabaseName:            os.Getenv("DATABASE_NAME"),
-		Port:                    os.Getenv("PORT"),
-		JwtSecretKey:            os.Getenv("SECRET_KEY"),
-		CacheAddress:            os.Getenv("REDIS_URL"),
-		LogLevel:                os.Getenv("LOG_LEVEL"),
-		AppName:                 os.Getenv("APP_NAME"),
-		CloudinaryUrl:           os.Getenv("CLOUDINARY_URL"),
-		AuthSessionTTLInMinutes: authSessionTTLInMinutes,
-		Environment:             environment,
+		DatabaseUrl:              os.Getenv("DATABASE_URL"),
+		DatabaseName:             os.Getenv("DATABASE_NAME"),
+		Port:                     os.Getenv("PORT"),
+		JwtSecretKey:             os.Getenv("SECRET_KEY"),
+		CacheAddress:             os.Getenv("REDIS_URL"),
+		LogLevel:                 os.Getenv("LOG_LEVEL"),
+		AppName:                  os.Getenv("APP_NAME"),
+		CloudinaryUrl:            os.Getenv("CLOUDINARY_URL"),
+		SMTPExpressProjectSecret: os.Getenv("SMTPEXPRESS_PROJECT_SECRET"),
+		SenderEmail:              os.Getenv("APP_SENDER_EMAIL"),
+		AuthSessionTTLInMinutes:  authSessionTTLInMinutes,
+		Environment:              environment,
 	}
 
 	return &configurations

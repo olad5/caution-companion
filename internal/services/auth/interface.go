@@ -31,4 +31,7 @@ type AuthService interface {
 	IsUserLoggedIn(ctx context.Context, authHeader, userId string) bool
 	GetUserIdFromRefreshToken(ctx context.Context, refreshToken string) (uuid.UUID, error)
 	LogUserOut(ctx context.Context, userId string) error
+	AddPasswordResetTokenToCache(ctx context.Context, userId uuid.UUID, token string) error
+	GetUserIdFromPasswordResetToken(ctx context.Context, token string) (string, error)
+	DeletePasswordResetToken(ctx context.Context, token string) error
 }
