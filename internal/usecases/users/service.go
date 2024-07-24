@@ -149,6 +149,16 @@ func (u *UserService) GetLoggedInUser(ctx context.Context) (domain.User, error) 
 	if err != nil {
 		return domain.User{}, err
 	}
+
+	// for fixing user_name migration
+	if existingUser.UserName == "" {
+		existingUser.UserName = createDefaultUserName(existingUser.FirstName, existingUser.LastName)
+		existingUser.UpdatedAt = time.Now()
+		err = u.userRepo.UpdateUser(ctx, existingUser)
+		if err != nil {
+			return domain.User{}, err
+		}
+	}
 	return existingUser, nil
 }
 
