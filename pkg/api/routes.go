@@ -130,6 +130,7 @@ func NewHttpRouter(
 
 		r.Put("/users", userHandler.EditUser)
 		r.Get("/users/me", userHandler.GetLoggedInUser)
+		r.Put("/users/password", userHandler.ChangePassword)
 	})
 
 	router.Group(func(r chi.Router) {

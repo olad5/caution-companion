@@ -153,6 +153,7 @@ func (u *UserService) GetLoggedInUser(ctx context.Context) (domain.User, error) 
 }
 
 func (u *UserService) LogUserOut(ctx context.Context) error {
+	// TODO:TODO: this jwt check is duplicated multiple times, clean it up
 	jwtClaims, ok := auth.GetJWTClaims(ctx)
 	if !ok {
 		return fmt.Errorf("error parsing JWTClaims: %v", ErrInvalidToken)
@@ -187,6 +188,43 @@ func (u *UserService) ForgotPassword(ctx context.Context, email string) error {
 	return nil
 }
 
+func (u *UserService) ChangePassword(ctx context.Context, oldPassword, newPassword string) error {
+	jwtClaims, ok := auth.GetJWTClaims(ctx)
+	if !ok {
+		// TODO:TODO: format the erros well, let Error sto start with uppercase
+		return fmt.Errorf("error parsing JWTClaims: %v", ErrInvalidToken)
+	}
+	userId := jwtClaims.ID
+
+	existingUser, err := u.userRepo.GetUserByUserId(ctx, userId)
+	if err != nil {
+		return err
+	}
+
+	if isOldPasswordCorrect := comparePasswords(existingUser.Password, []byte(oldPassword)); !isOldPasswordCorrect {
+		return ErrPasswordIncorrect
+	}
+	hashedPassword, err := hashAndSalt([]byte(newPassword))
+	if err != nil {
+		return err
+	}
+
+	existingUser.Password = hashedPassword
+	existingUser.UpdatedAt = time.Now()
+	err = u.userRepo.UpdateUser(ctx, existingUser)
+	if err != nil {
+		return err
+	}
+
+	err = u.authService.LogUserOut(ctx, existingUser.ID.String())
+	if err != nil {
+		// TODO:TODO:  // log err,
+		return fmt.Errorf("Error deleting existing JWTClaims: %v", err)
+	}
+
+	return nil
+}
+
 func (u *UserService) ResetPassword(ctx context.Context, token, newPassword string) error {
 	id, err := u.authService.GetUserIdFromPasswordResetToken(ctx, token)
 	if err != nil {
@@ -213,6 +251,12 @@ func (u *UserService) ResetPassword(ctx context.Context, token, newPassword stri
 	err = u.userRepo.UpdateUser(ctx, existingUser)
 	if err != nil {
 		return err
+	}
+
+	err = u.authService.LogUserOut(ctx, existingUser.ID.String())
+	if err == nil {
+		// TODO:TODO:  // log err, not important to return
+		// err
 	}
 
 	return u.authService.DeletePasswordResetToken(ctx, token)
