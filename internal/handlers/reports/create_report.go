@@ -40,7 +40,11 @@ func (rh ReportsHandler) CreateReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newReport, err := rh.userService.CreateReport(ctx, request.IncidentType, request.Location.Longitude, request.Location.Latitude, request.Description)
+	newReport, err := rh.userService.CreateReport(
+		ctx, request.IncidentType,
+		request.Location.Longitude,
+		request.Location.Latitude,
+		request.Description)
 	if err != nil {
 		switch {
 
@@ -53,5 +57,6 @@ func (rh ReportsHandler) CreateReport(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	response.SuccessResponse(w, "report created successfully", ToReportDTO(newReport), rh.logger)
+	response.SuccessResponse(w, "report created successfully",
+		ToReportDTO(newReport), rh.logger)
 }

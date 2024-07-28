@@ -116,6 +116,7 @@ func NewHttpRouter(
 		r.Post("/users/login", userHandler.Login)
 		r.Post("/users/token/refresh", userHandler.RefreshAccessToken)
 		r.Post("/users/forgot-password", userHandler.ForgotPassword)
+		r.Post("/users/reset-password/verify-token", userHandler.VerifyResetPasswordToken)
 		r.Post("/users/reset-password", userHandler.ResetPassword)
 	})
 

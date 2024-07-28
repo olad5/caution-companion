@@ -89,7 +89,7 @@ func (u *UserService) EditUser(ctx context.Context, firstName, lastName, userNam
 	}
 
 	found, err := u.userRepo.GetUserByUserName(ctx, userName)
-	if err == nil && found.UserName == userName {
+	if err == nil && found.UserName == userName && userName != existingUser.UserName {
 		return domain.User{}, ErrUserNameAlreadyExists
 	}
 
@@ -201,8 +201,8 @@ func (u *UserService) ForgotPassword(ctx context.Context, email string) error {
 func (u *UserService) ChangePassword(ctx context.Context, oldPassword, newPassword string) error {
 	jwtClaims, ok := auth.GetJWTClaims(ctx)
 	if !ok {
-		// TODO:TODO: format the erros well, let Error sto start with uppercase
-		return fmt.Errorf("error parsing JWTClaims: %v", ErrInvalidToken)
+		// TODO:TODO: format the erros well, let Error start with uppercase
+		return fmt.Errorf("Error parsing JWTClaims: %v", ErrInvalidToken)
 	}
 	userId := jwtClaims.ID
 
@@ -230,6 +230,25 @@ func (u *UserService) ChangePassword(ctx context.Context, oldPassword, newPasswo
 	if err != nil {
 		// TODO:TODO:  // log err,
 		return fmt.Errorf("Error deleting existing JWTClaims: %v", err)
+	}
+
+	return nil
+}
+
+func (u *UserService) VerifyResetPasswordToken(ctx context.Context, token string) error {
+	id, err := u.authService.GetUserIdFromPasswordResetToken(ctx, token)
+	if err != nil {
+		return err
+	}
+
+	userId, err := uuid.Parse(id)
+	if err != nil {
+		return ErrInvalidToken
+	}
+
+	_, err = u.userRepo.GetUserByUserId(ctx, userId)
+	if err != nil {
+		return err
 	}
 
 	return nil

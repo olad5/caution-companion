@@ -23,7 +23,10 @@ func NewReportsService(reportRepo infra.ReportRepository) (*ReportService, error
 	return &ReportService{reportRepo}, nil
 }
 
-func (r *ReportService) CreateReport(ctx context.Context, incidentType, longitude, latitude, description string) (domain.Report, error) {
+func (r *ReportService) CreateReport(
+	ctx context.Context,
+	incidentType, longitude, latitude, description string,
+) (domain.Report, error) {
 	incidentTypes := []string{"robbery", "fire", "accident", "cult"}
 
 	isIncidentTypeLegit := false
@@ -54,7 +57,9 @@ func (r *ReportService) CreateReport(ctx context.Context, incidentType, longitud
 	return newReport, nil
 }
 
-func (r *ReportService) GetReportByReportId(ctx context.Context, reportId uuid.UUID) (domain.Report, error) {
+func (r *ReportService) GetReportByReportId(
+	ctx context.Context, reportId uuid.UUID,
+) (domain.Report, error) {
 	existingReport, err := r.reportRepo.GetReportByReportId(ctx, reportId)
 	if err != nil {
 		return domain.Report{}, err
@@ -62,7 +67,10 @@ func (r *ReportService) GetReportByReportId(ctx context.Context, reportId uuid.U
 	return existingReport, nil
 }
 
-func (r *ReportService) GetLatestReports(ctx context.Context, pageNumber, rowsPerPage int) ([]domain.Report, error) {
+func (r *ReportService) GetLatestReports(
+	ctx context.Context,
+	pageNumber, rowsPerPage int,
+) ([]domain.Report, error) {
 	reports, err := r.reportRepo.GetLatestReports(ctx, pageNumber, rowsPerPage)
 	if err != nil {
 		return []domain.Report{}, err
@@ -70,8 +78,11 @@ func (r *ReportService) GetLatestReports(ctx context.Context, pageNumber, rowsPe
 	return reports, nil
 }
 
-func (r *ReportService) GetReportsByUserId(ctx context.Context, userId uuid.UUID, pageNumber, rowsPerPage int) ([]domain.Report, error) {
-	reports, err := r.reportRepo.GetReportsByUserId(ctx, userId, pageNumber, rowsPerPage)
+func (r *ReportService) GetReportsByUserId(
+	ctx context.Context, userId uuid.UUID, pageNumber, rowsPerPage int,
+) ([]domain.Report, error) {
+	reports, err := r.reportRepo.GetReportsByUserId(
+		ctx, userId, pageNumber, rowsPerPage)
 	if err != nil {
 		return []domain.Report{}, err
 	}
