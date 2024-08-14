@@ -67,6 +67,7 @@ func (u *UserService) CreateUser(ctx context.Context, firstName, lastName, email
 		LastName:  strings.ToLower(lastName),
 		UserName:  createDefaultUserName(firstName, lastName),
 		Password:  hashedPassword,
+		CreatedAt: time.Now(),
 	}
 
 	err = u.userRepo.CreateUser(ctx, newUser)
