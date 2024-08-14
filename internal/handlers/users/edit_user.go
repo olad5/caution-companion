@@ -23,8 +23,8 @@ func (u UserHandler) EditUser(w http.ResponseWriter, r *http.Request) {
 		FirstName string `json:"first_name" validate:"required,alpha"`
 		LastName  string `json:"last_name" validate:"required,alpha"`
 		UserName  string `json:"user_name" validate:"required,lte=12"`
-		Phone     string `json:"phone" validate:"required,len=11"`
-		Location  string `json:"location" validate:"required,gt=3"`
+		Phone     string `json:"phone,omitempty" validate:"omitempty,len=11"`
+		Location  string `json:"location,omitempty" validate:"omitempty,gt=3"`
 	}
 
 	request, err := response.Decode[requestDTO](r)

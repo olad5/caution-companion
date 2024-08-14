@@ -15,8 +15,10 @@ import (
 
 	"github.com/olad5/caution-companion/config"
 	"github.com/olad5/caution-companion/config/data"
+	"github.com/olad5/caution-companion/internal/infra/cloudinary"
 	"github.com/olad5/caution-companion/internal/infra/postgres"
 	"github.com/olad5/caution-companion/internal/infra/redis"
+	"github.com/olad5/caution-companion/internal/infra/smtpexpress"
 	"github.com/olad5/caution-companion/pkg/api"
 	"github.com/olad5/caution-companion/pkg/utils/logger"
 	"github.com/olad5/caution-companion/tests"
@@ -61,7 +63,24 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal("Error Initializing redisCache", err)
 	}
-	appRouter = api.NewHttpRouter(ctx, userRepo, reportsRepo, redisCache, configurations, l)
+	fileStore, err := cloudinary.NewCloudinaryFileStore(ctx, configurations)
+	if err != nil {
+		log.Fatal("Error Initializing fileStore", err)
+	}
+
+	mailService, err := smtpexpress.New(ctx, configurations)
+	if err != nil {
+		log.Fatal("Error Initializing smtpexpress mailservice", err)
+	}
+	appRouter = api.NewHttpRouter(
+		ctx,
+		userRepo,
+		reportsRepo,
+		fileStore,
+		redisCache,
+		mailService,
+		configurations,
+		l)
 
 	exitVal := m.Run()
 	os.Exit(exitVal)
@@ -285,17 +304,20 @@ func TestEditUserProfile(t *testing.T) {
 
 			newEmail := lastName + fmt.Sprint(tests.GenerateUniqueId()) + "@gmail.com"
 			newFirstName := "michael"
-			newLocation := "south bay"
-			newUserName := "iamfisher"
+			newLocation := ""
+			someUniqueId := (fmt.Sprint(tests.GenerateUniqueId()))
+			newUserName := "iamfisher" + someUniqueId[len(someUniqueId)-3:]
+			newAvatar := "https://res.cloudinary.com/deda4nfxl/image/upload/v1721583338/caution-companion/caution-companion/avatars/4608bc1b98c84a06838fafb5e38fb552.jpg"
 			phone := "08093487904"
 			requestBody := []byte(fmt.Sprintf(`{
       "email": "%s",
       "first_name": "%s",
       "last_name": "%s",
+      "avatar": "%s",
       "user_name": "%s",
       "location": "%s",
       "phone": "%s"
-      }`, newEmail, newFirstName, lastName, newUserName, newLocation, phone))
+      }`, newEmail, newFirstName, lastName, newAvatar, newUserName, newLocation, phone))
 			req, _ := http.NewRequest(http.MethodPut, route, bytes.NewBuffer(requestBody))
 			req.Header.Set("Authorization", "Bearer "+ac)
 			response := tests.ExecuteRequest(req, appRouter)
