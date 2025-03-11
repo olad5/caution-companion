@@ -1,11 +1,4 @@
-version: "3.1"
-
 services:
-  mongo:
-    container_name: test-caution-companion-mongo
-    image: mongo:4.4.20-rc0
-    ports:
-      - 20010:27017
 
   postgres:
     container_name: test-caution-companion-postgres
@@ -17,15 +10,6 @@ services:
       - POSTGRES_DB=test-caution-companion-postgres
     ports:
       - '5107:5432'
-
-  adminer:
-    container_name: test-caution-companion-adminer
-    image: adminer:4.8.1
-    environment:
-      ADMINER_DEFAULT_SERVER: postgresql
-      ADMINER_DESIGN: hever
-    ports:
-      - "7080:8080"
 
   redis:
     container_name: test-caution-companion-redis
