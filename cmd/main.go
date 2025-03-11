@@ -70,7 +70,7 @@ func main() {
 		l)
 
 	port := configurations.Port
-	server := &http.Server{Addr: ":" + port, Handler: loggingMiddleware.RequestLogger(appRouter, configurations)}
+	server := &http.Server{Addr: "0.0.0.0:" + port, Handler: loggingMiddleware.RequestLogger(appRouter, configurations)}
 	go func() {
 		message := "Server is running on port " + port
 		fmt.Println(message)
