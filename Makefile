@@ -13,3 +13,5 @@ test.verbose: app.docker.test.start
 run.dev.watch: app.docker.test.start 
 		air -c .air.toml
 
+build.run: 
+		go build -v cmd/main.go  && ./main
