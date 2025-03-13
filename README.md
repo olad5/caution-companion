@@ -27,6 +27,12 @@ A backend service for an emergency alert app that notifies users in the vicinity
   ```
 
 
+## Add environment variables
+
+```bash
+    cp sample.env .env
+```
+
 ## Build and Start the Server
 
 ```bash
