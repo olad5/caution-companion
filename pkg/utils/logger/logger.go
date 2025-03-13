@@ -83,17 +83,6 @@ func Get(cfg *config.Configurations) *zap.Logger {
 	return logger
 }
 
-// TODO:TODO: what is this FromCtx used for
-func FromCtx(ctx context.Context) *zap.Logger {
-	if l, ok := ctx.Value(ctxKey{}).(*zap.Logger); ok {
-		return l
-	} else if l := logger; l != nil {
-		return l
-	}
-
-	return zap.NewNop()
-}
-
 func WithCtx(ctx context.Context, l *zap.Logger) context.Context {
 	if lp, ok := ctx.Value(ctxKey{}).(*zap.Logger); ok {
 		if lp == l {
