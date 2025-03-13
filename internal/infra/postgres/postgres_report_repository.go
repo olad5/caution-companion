@@ -151,6 +151,7 @@ func toReport(r SqlxReport) domain.Report {
 func toSqlxReport(r domain.Report) SqlxReport {
 	return SqlxReport{
 		ID:           r.ID,
+		OwnerID:      r.OwnerID,
 		IncidentType: r.IncidentType,
 		Longitude:    r.Longitude,
 		Latitude:     r.Latitude,
