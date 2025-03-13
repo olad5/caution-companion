@@ -6,7 +6,6 @@ import (
 
 	"github.com/olad5/caution-companion/internal/infra"
 	"github.com/olad5/caution-companion/internal/services/auth"
-	"github.com/olad5/caution-companion/internal/usecases/users"
 	appErrors "github.com/olad5/caution-companion/pkg/errors"
 	response "github.com/olad5/caution-companion/pkg/utils"
 	utils "github.com/olad5/caution-companion/pkg/utils/validation"
@@ -49,7 +48,7 @@ func (u UserHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 			response.ErrorResponse(w, err.Error(), http.StatusNotFound)
 			return
 		case errors.Is(err, auth.ErrRetrievingPasswordResetToken):
-			response.ErrorResponse(w, users.ErrInvalidToken.Error(), http.StatusUnauthorized)
+			response.ErrorResponse(w, appErrors.ErrInvalidToken.Error(), http.StatusUnauthorized)
 			return
 		default:
 			response.InternalServerErrorResponse(w, err, u.logger)

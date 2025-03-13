@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/olad5/caution-companion/internal/domain"
 	"github.com/olad5/caution-companion/internal/infra"
+	appErrors "github.com/olad5/caution-companion/pkg/errors"
 )
 
 type RedisAuthService struct {
@@ -19,7 +20,6 @@ type RedisAuthService struct {
 }
 
 var (
-	ErrInvalidToken                 = errors.New("invalid token")
 	ErrExpiredToken                 = errors.New("expired token")
 	ErrGeneratingToken              = errors.New("Error generating JWT token")
 	ErrGeneratingPasswordResetToken = errors.New("Error generating password reset token")
@@ -90,10 +90,10 @@ func (r *RedisAuthService) GetUserIdFromRefreshToken(ctx context.Context, refres
 	match := "*" + refreshPrefix + refreshToken + ":*"
 	results, err := r.Cache.GetAllKeysUsingWildCard(ctx, match)
 	if err != nil {
-		return uuid.New(), ErrInvalidToken
+		return uuid.New(), appErrors.ErrInvalidToken
 	}
 	if len(results) != 1 {
-		return uuid.New(), ErrInvalidToken
+		return uuid.New(), appErrors.ErrInvalidToken
 	}
 
 	first := results[0]
@@ -102,7 +102,7 @@ func (r *RedisAuthService) GetUserIdFromRefreshToken(ctx context.Context, refres
 
 	id, err := uuid.Parse(elements[1])
 	if err != nil {
-		return uuid.New(), ErrInvalidToken
+		return uuid.New(), appErrors.ErrInvalidToken
 	}
 
 	return id, nil
@@ -137,12 +137,12 @@ func (r *RedisAuthService) extractTokensFromExistingValueInCache(ctx context.Con
 func extractRefreshTokenFromKey(token string) (string, error) {
 	tokenSplits := strings.Split(token, refreshPrefix)
 	if len(tokenSplits) == 1 && tokenSplits[0] == token {
-		return "", fmt.Errorf("Error extracting refresh token from key: %w", ErrInvalidToken)
+		return "", fmt.Errorf("Error extracting refresh token from key: %w", appErrors.ErrInvalidToken)
 	}
 
 	refreshSplits := strings.Split(tokenSplits[1], colonDelimiter+JWT_HASH_NAME)
 	if len(refreshSplits) == 1 && refreshSplits[0] == tokenSplits[1] {
-		return "", fmt.Errorf("Error extracting refresh token from key: %w", ErrInvalidToken)
+		return "", fmt.Errorf("Error extracting refresh token from key: %w", appErrors.ErrInvalidToken)
 	}
 
 	return refreshSplits[0], nil
@@ -168,7 +168,7 @@ func (r *RedisAuthService) DecodeJWT(ctx context.Context, authHeader string) (JW
 	if strings.HasPrefix(authHeader, Bearer) {
 		tokenString = strings.TrimPrefix(authHeader, Bearer)
 		if tokenString == "" {
-			return JWTClaims{}, ErrInvalidToken
+			return JWTClaims{}, appErrors.ErrInvalidToken
 		}
 	}
 
@@ -203,7 +203,7 @@ func (r *RedisAuthService) DecodeJWT(ctx context.Context, authHeader string) (JW
 
 		return jwtClaims, nil
 	}
-	return JWTClaims{}, ErrInvalidToken
+	return JWTClaims{}, appErrors.ErrInvalidToken
 }
 
 func (r *RedisAuthService) AddPasswordResetTokenToCache(

@@ -4,9 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/olad5/caution-companion/internal/usecases/users"
-
 	"github.com/olad5/caution-companion/internal/infra"
+	appErrors "github.com/olad5/caution-companion/pkg/errors"
 	response "github.com/olad5/caution-companion/pkg/utils"
 )
 
@@ -18,7 +17,7 @@ func (u UserHandler) GetLoggedInUser(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, infra.ErrUserNotFound):
 			response.ErrorResponse(w, err.Error(), http.StatusNotFound)
-		case errors.Is(err, users.ErrInvalidToken):
+		case errors.Is(err, appErrors.ErrInvalidToken):
 			response.ErrorResponse(w, err.Error(), http.StatusUnauthorized)
 			return
 		default:

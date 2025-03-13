@@ -47,7 +47,6 @@ func (rh ReportsHandler) CreateReport(w http.ResponseWriter, r *http.Request) {
 		request.Description)
 	if err != nil {
 		switch {
-
 		case errors.Is(err, reports.ErrInvalidIncidentType):
 			response.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 			return

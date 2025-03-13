@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/olad5/caution-companion/internal/infra"
-	"github.com/olad5/caution-companion/internal/services/auth"
 	appErrors "github.com/olad5/caution-companion/pkg/errors"
 	response "github.com/olad5/caution-companion/pkg/utils"
 	utils "github.com/olad5/caution-companion/pkg/utils/validation"
@@ -37,7 +36,7 @@ func (u UserHandler) RefreshAccessToken(w http.ResponseWriter, r *http.Request) 
 	accessToken, refreshToken, err := u.userService.RefreshUserAccessToken(ctx, request.RefreshToken)
 	if err != nil {
 		switch {
-		case errors.Is(err, auth.ErrInvalidToken):
+		case errors.Is(err, appErrors.ErrInvalidToken):
 			response.ErrorResponse(w, appErrors.ErrUnauthorized, http.StatusUnauthorized)
 			return
 		case errors.Is(err, infra.ErrUserNotFound):

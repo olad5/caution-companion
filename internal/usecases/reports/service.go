@@ -3,11 +3,14 @@ package reports
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/olad5/caution-companion/internal/domain"
 	"github.com/olad5/caution-companion/internal/infra"
+	"github.com/olad5/caution-companion/internal/services/auth"
+	appErrors "github.com/olad5/caution-companion/pkg/errors"
 )
 
 type ReportService struct {
@@ -27,6 +30,11 @@ func (r *ReportService) CreateReport(
 	ctx context.Context,
 	incidentType, longitude, latitude, description string,
 ) (domain.Report, error) {
+	jwtClaims, ok := auth.GetJWTClaims(ctx)
+	if !ok {
+		return domain.Report{}, fmt.Errorf("error parsing JWTClaims: %v", appErrors.ErrInvalidToken)
+	}
+	userId := jwtClaims.ID
 	incidentTypes := []string{"robbery", "fire", "accident", "cult"}
 
 	isIncidentTypeLegit := false
@@ -42,6 +50,7 @@ func (r *ReportService) CreateReport(
 
 	newReport := domain.Report{
 		ID:           uuid.New(),
+		OwnerID:      userId,
 		IncidentType: incidentType,
 		Longitude:    longitude,
 		Latitude:     latitude,

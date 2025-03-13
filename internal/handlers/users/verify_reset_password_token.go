@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/olad5/caution-companion/internal/services/auth"
-	"github.com/olad5/caution-companion/internal/usecases/users"
 	appErrors "github.com/olad5/caution-companion/pkg/errors"
 	response "github.com/olad5/caution-companion/pkg/utils"
 	utils "github.com/olad5/caution-companion/pkg/utils/validation"
@@ -40,7 +39,7 @@ func (u UserHandler) VerifyResetPasswordToken(w http.ResponseWriter, r *http.Req
 		case errors.Is(err, auth.ErrRetrievingPasswordResetToken):
 			response.ErrorResponse(w, err.Error(), http.StatusUnauthorized)
 			return
-		case errors.Is(err, users.ErrInvalidToken):
+		case errors.Is(err, appErrors.ErrInvalidToken):
 			response.ErrorResponse(w, err.Error(), http.StatusUnauthorized)
 			return
 		default:

@@ -13,6 +13,7 @@ import (
 	"github.com/olad5/caution-companion/internal/domain"
 	"github.com/olad5/caution-companion/internal/infra"
 	"github.com/olad5/caution-companion/internal/services/auth"
+	appErrors "github.com/olad5/caution-companion/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,8 +26,6 @@ type UserService struct {
 var (
 	ErrUserAlreadyExists     = errors.New("email already exist")
 	ErrUserNameAlreadyExists = errors.New("user_name already exist")
-	ErrPasswordIncorrect     = errors.New("invalid credentials")
-	ErrInvalidToken          = errors.New("invalid token")
 )
 
 const DEFAULT_AVATAR = "https://res.cloudinary.com/deda4nfxl/image/upload/v1721583338/caution-companion/caution-companion/avatars/4608bc1b98c84a06838fafb5e38fb552.jpg"
@@ -80,7 +79,7 @@ func (u *UserService) CreateUser(ctx context.Context, firstName, lastName, email
 func (u *UserService) EditUser(ctx context.Context, firstName, lastName, userName, email, avatarUrl, location, phone string) (domain.User, error) {
 	jwtClaims, ok := auth.GetJWTClaims(ctx)
 	if !ok {
-		return domain.User{}, fmt.Errorf("error parsing JWTClaims: %v", ErrInvalidToken)
+		return domain.User{}, fmt.Errorf("error parsing JWTClaims: %v", appErrors.ErrInvalidToken)
 	}
 	userId := jwtClaims.ID
 
@@ -129,7 +128,7 @@ func (u *UserService) LogUserIn(ctx context.Context, email, password string) (st
 	}
 
 	if isPasswordCorrect := comparePasswords(existingUser.Password, []byte(password)); !isPasswordCorrect {
-		return "", "", ErrPasswordIncorrect
+		return "", "", appErrors.ErrPasswordIncorrect
 	}
 
 	accessToken, refreshToken, err := u.authService.GenerateAuthTokens(ctx, existingUser)
@@ -142,7 +141,7 @@ func (u *UserService) LogUserIn(ctx context.Context, email, password string) (st
 func (u *UserService) GetLoggedInUser(ctx context.Context) (domain.User, error) {
 	jwtClaims, ok := auth.GetJWTClaims(ctx)
 	if !ok {
-		return domain.User{}, fmt.Errorf("error parsing JWTClaims: %v", ErrInvalidToken)
+		return domain.User{}, fmt.Errorf("error parsing JWTClaims: %v", appErrors.ErrInvalidToken)
 	}
 	userId := jwtClaims.ID
 
@@ -164,10 +163,9 @@ func (u *UserService) GetLoggedInUser(ctx context.Context) (domain.User, error) 
 }
 
 func (u *UserService) LogUserOut(ctx context.Context) error {
-	// TODO:TODO: this jwt check is duplicated multiple times, clean it up
 	jwtClaims, ok := auth.GetJWTClaims(ctx)
 	if !ok {
-		return fmt.Errorf("error parsing JWTClaims: %v", ErrInvalidToken)
+		return fmt.Errorf("error parsing JWTClaims: %v", appErrors.ErrInvalidToken)
 	}
 	userId := jwtClaims.ID
 
@@ -188,7 +186,6 @@ func (u *UserService) ForgotPassword(ctx context.Context, email string) error {
 	}
 	err = u.authService.AddPasswordResetTokenToCache(ctx, existingUser.ID, otp)
 	if err != nil {
-		// TODO:TODO: i need to log stuff
 		return err
 	}
 	err = u.mailService.Send(ctx, opts)
@@ -202,8 +199,7 @@ func (u *UserService) ForgotPassword(ctx context.Context, email string) error {
 func (u *UserService) ChangePassword(ctx context.Context, oldPassword, newPassword string) error {
 	jwtClaims, ok := auth.GetJWTClaims(ctx)
 	if !ok {
-		// TODO:TODO: format the erros well, let Error start with uppercase
-		return fmt.Errorf("Error parsing JWTClaims: %v", ErrInvalidToken)
+		return fmt.Errorf("Error parsing JWTClaims: %v", appErrors.ErrInvalidToken)
 	}
 	userId := jwtClaims.ID
 
@@ -213,7 +209,7 @@ func (u *UserService) ChangePassword(ctx context.Context, oldPassword, newPasswo
 	}
 
 	if isOldPasswordCorrect := comparePasswords(existingUser.Password, []byte(oldPassword)); !isOldPasswordCorrect {
-		return ErrPasswordIncorrect
+		return appErrors.ErrPasswordIncorrect
 	}
 	hashedPassword, err := hashAndSalt([]byte(newPassword))
 	if err != nil {
@@ -244,7 +240,7 @@ func (u *UserService) VerifyResetPasswordToken(ctx context.Context, token string
 
 	userId, err := uuid.Parse(id)
 	if err != nil {
-		return ErrInvalidToken
+		return appErrors.ErrInvalidToken
 	}
 
 	_, err = u.userRepo.GetUserByUserId(ctx, userId)
@@ -263,7 +259,7 @@ func (u *UserService) ResetPassword(ctx context.Context, token, newPassword stri
 
 	userId, err := uuid.Parse(id)
 	if err != nil {
-		return ErrInvalidToken
+		return appErrors.ErrInvalidToken
 	}
 
 	existingUser, err := u.userRepo.GetUserByUserId(ctx, userId)

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/olad5/caution-companion/internal/infra"
-	"github.com/olad5/caution-companion/internal/usecases/users"
 	appErrors "github.com/olad5/caution-companion/pkg/errors"
 	response "github.com/olad5/caution-companion/pkg/utils"
 	utils "github.com/olad5/caution-companion/pkg/utils/validation"
@@ -41,7 +40,7 @@ func (u UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, infra.ErrUserNotFound):
 			response.ErrorResponse(w, "user does not exist", http.StatusNotFound)
 			return
-		case errors.Is(err, users.ErrPasswordIncorrect):
+		case errors.Is(err, appErrors.ErrPasswordIncorrect):
 			response.ErrorResponse(w, "invalid credentials", http.StatusUnauthorized)
 			return
 		default:

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/olad5/caution-companion/internal/usecases/users"
 	appErrors "github.com/olad5/caution-companion/pkg/errors"
 	response "github.com/olad5/caution-companion/pkg/utils"
 	utils "github.com/olad5/caution-companion/pkg/utils/validation"
@@ -42,7 +41,7 @@ func (u UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	err = u.userService.ChangePassword(ctx, request.OldPassword, request.NewPassword)
 	if err != nil {
 		switch {
-		case errors.Is(err, users.ErrPasswordIncorrect):
+		case errors.Is(err, appErrors.ErrPasswordIncorrect):
 			response.ErrorResponse(w, err.Error(), http.StatusBadRequest)
 			return
 		default:
