@@ -37,7 +37,6 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	// TODO:TODO: I should be able to allow it to wait in the make file and not here
 	time.Sleep(8 * time.Second) // Wait for docker containers to start
 	configurations = config.GetConfig("../config/.test.env")
 	ctx := context.Background()
@@ -377,27 +376,6 @@ func TestCreatReport(t *testing.T) {
 
 func TestGetReportByReportId(t *testing.T) {
 	route := "/reports"
-	t.Run("test for invalid json request body",
-		func(t *testing.T) {
-			t.Skip()
-			// TODO:TODO: fix this bit later
-			req, _ := http.NewRequest(http.MethodPost, route, nil)
-			response := tests.ExecuteRequest(req, appRouter)
-			tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
-		},
-	)
-	// TODO:TODO: i might need to test this
-	// t.Run("test for undefined email address in request body",
-	// 	func(t *testing.T) {
-	// 		requestBody := []byte(fmt.Sprintf(`{
-	// "email": "%v",
-	// "password": "%v"
-	// }`, nil, nil))
-	// 		req, _ := http.NewRequest(http.MethodPost, route, bytes.NewBuffer(requestBody))
-	// 		response := tests.ExecuteRequest(req, appRouter)
-	// 		tests.AssertStatusCode(t, http.StatusBadRequest, response.Code)
-	// 	},
-	// )
 	t.Run(` Given a user tries to get an emergency report by ID and the report 
     exists, when they provide the correct ID, they receive the report details.
     `,
@@ -429,32 +407,6 @@ func TestGetReportByReportId(t *testing.T) {
 
 func TestGetLatestReports(t *testing.T) {
 	route := "/reports"
-	t.Run(`Given a user tries to get the latest emergency reports and there are 
-    recent reports available, when they make the request, they receive a list 
-    of the most recent emergency reports.
-    `,
-		func(t *testing.T) {
-			// TODO:TODO: this test case title is wrong
-			t.Skip()
-			token, _ := logUserIn(t, userEmail, userPassword)
-
-			req, _ := http.NewRequest(http.MethodGet, route+"/latest"+"?page=1&rows=20", nil)
-			req.Header.Set("Authorization", "Bearer "+token)
-			response := tests.ExecuteRequest(req, appRouter)
-
-			tests.AssertStatusCode(t, http.StatusOK, response.Code)
-			responseBody := tests.ParseResponse(t, response)
-			message := responseBody["message"].(string)
-			tests.AssertResponseMessage(t, message, "latest reports retrieved successfully")
-
-			data := responseBody["data"].(map[string]interface{})
-			reports := data["items"].([]interface{})
-			const numberOfReports = 3
-			if len(reports) != numberOfReports {
-				t.Errorf("got files length: %d expected: %d", len(reports), numberOfReports)
-			}
-		},
-	)
 	t.Run(`Given a user tries to get the latest emergency reports and there are 
     recent reports available, when they make the request, they receive a list 
     of the most recent emergency reports.

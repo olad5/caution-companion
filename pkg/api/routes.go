@@ -106,7 +106,6 @@ func NewHttpRouter(
 	})
 
 	// -------------------------------------------------------------------------
-	// TODO:TODO: add prefixes to these routes
 	router.Group(func(r chi.Router) {
 		r.Use(
 			middleware.AllowContentType("application/json"),
