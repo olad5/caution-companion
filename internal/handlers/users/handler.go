@@ -9,12 +9,12 @@ import (
 )
 
 type UserHandler struct {
+	logger      *zap.Logger
 	userService users.UserService
 	authService auth.AuthService
-	logger      *zap.Logger
 }
 
-func NewUserHandler(userService users.UserService, authService auth.AuthService, logger *zap.Logger) (*UserHandler, error) {
+func NewUserHandler(logger *zap.Logger, userService users.UserService, authService auth.AuthService) (*UserHandler, error) {
 	if userService == (users.UserService{}) {
 		return nil, errors.New("user service cannot be empty")
 	}
@@ -22,5 +22,5 @@ func NewUserHandler(userService users.UserService, authService auth.AuthService,
 		return nil, errors.New("auth service cannot be empty")
 	}
 
-	return &UserHandler{userService, authService, logger}, nil
+	return &UserHandler{logger, userService, authService}, nil
 }

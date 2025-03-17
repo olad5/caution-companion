@@ -11,19 +11,21 @@ import (
 	"github.com/olad5/caution-companion/internal/infra"
 	"github.com/olad5/caution-companion/internal/services/auth"
 	appErrors "github.com/olad5/caution-companion/pkg/errors"
+	"go.uber.org/zap"
 )
 
 type ReportService struct {
+	logger     *zap.Logger
 	reportRepo infra.ReportRepository
 }
 
 var ErrInvalidIncidentType = errors.New("invalid incident_type")
 
-func NewReportsService(reportRepo infra.ReportRepository) (*ReportService, error) {
+func NewReportsService(l *zap.Logger, reportRepo infra.ReportRepository) (*ReportService, error) {
 	if reportRepo == nil {
 		return &ReportService{}, errors.New("ReportService failed to initialize, reportRepo is nil")
 	}
-	return &ReportService{reportRepo}, nil
+	return &ReportService{logger: l, reportRepo: reportRepo}, nil
 }
 
 func (r *ReportService) CreateReport(

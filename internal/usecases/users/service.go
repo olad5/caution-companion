@@ -14,10 +14,12 @@ import (
 	"github.com/olad5/caution-companion/internal/infra"
 	"github.com/olad5/caution-companion/internal/services/auth"
 	appErrors "github.com/olad5/caution-companion/pkg/errors"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
+	logger      *zap.Logger
 	userRepo    infra.UserRepository
 	authService auth.AuthService
 	mailService infra.MailService
@@ -31,6 +33,7 @@ var (
 const DEFAULT_AVATAR = "https://res.cloudinary.com/deda4nfxl/image/upload/v1721583338/caution-companion/caution-companion/avatars/4608bc1b98c84a06838fafb5e38fb552.jpg"
 
 func NewUserService(
+	logger *zap.Logger,
 	userRepo infra.UserRepository,
 	authService auth.AuthService,
 	mailService infra.MailService,
@@ -44,7 +47,7 @@ func NewUserService(
 	if mailService == nil {
 		return &UserService{}, errors.New("UserService failed to initialize, mailService is nil")
 	}
-	return &UserService{userRepo, authService, mailService}, nil
+	return &UserService{logger, userRepo, authService, mailService}, nil
 }
 
 func (u *UserService) CreateUser(ctx context.Context, firstName, lastName, email, password string) (domain.User, error) {
@@ -225,7 +228,7 @@ func (u *UserService) ChangePassword(ctx context.Context, oldPassword, newPasswo
 
 	err = u.authService.LogUserOut(ctx, existingUser.ID.String())
 	if err != nil {
-		// TODO:TODO:  // log err,
+		u.logger.Error("Error logging user out: ", zap.Error(err))
 		return fmt.Errorf("Error deleting existing JWTClaims: %v", err)
 	}
 
@@ -281,8 +284,7 @@ func (u *UserService) ResetPassword(ctx context.Context, token, newPassword stri
 
 	err = u.authService.LogUserOut(ctx, existingUser.ID.String())
 	if err == nil {
-		// TODO:TODO:  // log err, not important to return
-		// err
+		u.logger.Error("Error logging user out: ", zap.Error(err))
 	}
 
 	return u.authService.DeletePasswordResetToken(ctx, token)

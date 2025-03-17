@@ -8,14 +8,14 @@ import (
 )
 
 type ReportsHandler struct {
-	userService reports.ReportService
 	logger      *zap.Logger
+	userService reports.ReportService
 }
 
-func NewReportsHandler(reportsService reports.ReportService, logger *zap.Logger) (*ReportsHandler, error) {
+func NewReportsHandler(logger *zap.Logger, reportsService reports.ReportService) (*ReportsHandler, error) {
 	if reportsService == (reports.ReportService{}) {
 		return nil, errors.New("reports service cannot be empty")
 	}
 
-	return &ReportsHandler{reportsService, logger}, nil
+	return &ReportsHandler{logger, reportsService}, nil
 }

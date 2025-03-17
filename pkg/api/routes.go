@@ -39,20 +39,20 @@ func NewHttpRouter(
 		log.Fatal("Error Initializing Auth Service", err)
 	}
 
-	userService, err := users.NewUserService(userRepo, authService, mailService)
+	userService, err := users.NewUserService(l, userRepo, authService, mailService)
 	if err != nil {
 		log.Fatal("Error Initializing UserService")
 	}
 
-	userHandler, err := userHandlers.NewUserHandler(*userService, authService, l)
+	userHandler, err := userHandlers.NewUserHandler(l, *userService, authService)
 	if err != nil {
 		log.Fatal("failed to create the User handler: ", err)
 	}
-	reportsService, err := reports.NewReportsService(reportsRepo)
+	reportsService, err := reports.NewReportsService(l, reportsRepo)
 	if err != nil {
 		log.Fatal("Error Initializing UserService")
 	}
-	reportsHandler, err := reportsHandlers.NewReportsHandler(*reportsService, l)
+	reportsHandler, err := reportsHandlers.NewReportsHandler(l, *reportsService)
 	if err != nil {
 		log.Fatal("failed to create the Report handler: ", err)
 	}

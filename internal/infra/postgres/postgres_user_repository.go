@@ -10,18 +10,20 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/olad5/caution-companion/internal/domain"
 	"github.com/olad5/caution-companion/internal/infra"
+	"go.uber.org/zap"
 )
 
 type PostgresUserRepository struct {
+	logger     *zap.Logger
 	connection *sqlx.DB
 }
 
-func NewPostgresUserRepo(ctx context.Context, connection *sqlx.DB) (*PostgresUserRepository, error) {
+func NewPostgresUserRepo(ctx context.Context, logger *zap.Logger, connection *sqlx.DB) (*PostgresUserRepository, error) {
 	if connection == nil {
 		return &PostgresUserRepository{}, fmt.Errorf("Failed to create PostgresFileRepository: connection is nil")
 	}
 
-	return &PostgresUserRepository{connection: connection}, nil
+	return &PostgresUserRepository{logger: logger, connection: connection}, nil
 }
 
 func (p *PostgresUserRepository) CreateUser(ctx context.Context, user domain.User) error {
@@ -34,6 +36,7 @@ func (p *PostgresUserRepository) CreateUser(ctx context.Context, user domain.Use
 
 	_, err := p.connection.NamedExec(query, toSqlxUser(user))
 	if err != nil {
+		p.logger.Error("Error creating user in the db:  ", zap.Error(err))
 		return fmt.Errorf("error creating user in the db: %w", err)
 	}
 	return nil
@@ -60,6 +63,7 @@ func (p *PostgresUserRepository) UpdateUser(ctx context.Context, user domain.Use
 
 	_, err := p.connection.NamedExec(query, toSqlxUser(user))
 	if err != nil {
+		p.logger.Error("Error updating user in the db:  ", zap.Error(err))
 		return fmt.Errorf("error updating user in the db: %w", err)
 	}
 	return nil
@@ -73,6 +77,7 @@ func (p *PostgresUserRepository) GetUserByUserName(ctx context.Context, userName
 		if errors.Is(err, ErrRecordNotFound) {
 			return domain.User{}, infra.ErrUserNotFound
 		}
+		p.logger.Error("Error getting user by userName:  ", zap.Error(err))
 		return domain.User{}, fmt.Errorf("error getting user by userName: %w", err)
 	}
 	return toUser(user), nil
@@ -86,6 +91,7 @@ func (p *PostgresUserRepository) GetUserByEmail(ctx context.Context, userEmail s
 		if errors.Is(err, ErrRecordNotFound) {
 			return domain.User{}, infra.ErrUserNotFound
 		}
+		p.logger.Error("Error getting user by email:  ", zap.Error(err))
 		return domain.User{}, fmt.Errorf("error getting user by email: %w", err)
 	}
 	return toUser(user), nil
@@ -99,6 +105,7 @@ func (p *PostgresUserRepository) GetUserByUserId(ctx context.Context, userId uui
 		if errors.Is(err, ErrRecordNotFound) {
 			return domain.User{}, infra.ErrUserNotFound
 		}
+		p.logger.Error("Error getting user by userId:  ", zap.Error(err))
 		return domain.User{}, fmt.Errorf("error getting user by userId: %w", err)
 	}
 	return toUser(user), nil
@@ -106,6 +113,7 @@ func (p *PostgresUserRepository) GetUserByUserId(ctx context.Context, userId uui
 
 func (p *PostgresUserRepository) Ping(ctx context.Context) error {
 	if err := p.connection.Ping(); err != nil {
+		p.logger.Error("Error pinging PostgresUserRepository:  ", zap.Error(err))
 		return fmt.Errorf("failed to ping postgres database: %w", err)
 	}
 	return nil

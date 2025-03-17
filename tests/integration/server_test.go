@@ -49,25 +49,25 @@ func TestMain(m *testing.M) {
 
 	defer postgresConnection.Close()
 
-	userRepo, err := postgres.NewPostgresUserRepo(ctx, postgresConnection)
+	userRepo, err := postgres.NewPostgresUserRepo(ctx, l, postgresConnection)
 	if err != nil {
 		log.Fatal("Error Initializing User Repo", err)
 	}
-	reportsRepo, err := postgres.NewPostgresReportRepo(ctx, postgresConnection)
+	reportsRepo, err := postgres.NewPostgresReportRepo(ctx, l, postgresConnection)
 	if err != nil {
 		log.Fatal("Error Initializing Reports Repo", err)
 	}
 
-	redisCache, err := redis.New(ctx, configurations)
+	redisCache, err := redis.New(ctx, l, configurations)
 	if err != nil {
 		log.Fatal("Error Initializing redisCache", err)
 	}
-	fileStore, err := cloudinary.NewCloudinaryFileStore(ctx, configurations)
+	fileStore, err := cloudinary.NewCloudinaryFileStore(ctx, l, configurations)
 	if err != nil {
 		log.Fatal("Error Initializing fileStore", err)
 	}
 
-	mailService, err := smtpexpress.New(ctx, configurations)
+	mailService, err := smtpexpress.New(ctx, l, configurations)
 	if err != nil {
 		log.Fatal("Error Initializing smtpexpress mailservice", err)
 	}

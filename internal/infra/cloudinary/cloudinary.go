@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"github.com/olad5/caution-companion/config"
+	"go.uber.org/zap"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api"
@@ -13,15 +14,16 @@ import (
 )
 
 type CloudinaryFileStore struct {
-	cld *cloudinary.Cloudinary
+	logger *zap.Logger
+	cld    *cloudinary.Cloudinary
 }
 
-func NewCloudinaryFileStore(ctx context.Context, cfg *config.Configurations) (*CloudinaryFileStore, error) {
+func NewCloudinaryFileStore(ctx context.Context, logger *zap.Logger, cfg *config.Configurations) (*CloudinaryFileStore, error) {
 	cld, err := cloudinary.NewFromURL(cfg.CloudinaryUrl)
 	if err != nil {
 		return &CloudinaryFileStore{}, fmt.Errorf("failed to create a cloudinary client: %w", err)
 	}
-	return &CloudinaryFileStore{cld}, nil
+	return &CloudinaryFileStore{logger, cld}, nil
 }
 
 func (c *CloudinaryFileStore) SaveToFileStore(ctx context.Context, filename string, file io.Reader) (string, error) {
@@ -34,10 +36,8 @@ func (c *CloudinaryFileStore) SaveToFileStore(ctx context.Context, filename stri
 		Transformation:   "q_auto,c_fill,g_auto,h_200,w_200",
 	})
 	if err != nil {
-		if err != nil {
-			return "", fmt.Errorf("Unable to upload %s, %v", filename, err)
-		}
+		c.logger.Error("Unable to upload file to cloudinary: ", zap.Error(err))
+		return "", fmt.Errorf("Unable to upload %s, %v", filename, err)
 	}
-
 	return resp.SecureURL, nil
 }

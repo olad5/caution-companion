@@ -217,7 +217,6 @@ func (r *RedisAuthService) AddPasswordResetTokenToCache(
 }
 
 func (r *RedisAuthService) GetUserIdFromPasswordResetToken(ctx context.Context, token string) (string, error) {
-	// TODO:TODO: I need a logger here, things can go wrong
 	token, err := r.Cache.GetOne(ctx, constructPasswordResetKey(token))
 	if err != nil {
 		return "", ErrRetrievingPasswordResetToken

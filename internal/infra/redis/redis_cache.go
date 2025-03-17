@@ -8,14 +8,16 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/olad5/caution-companion/config"
+	"go.uber.org/zap"
 )
 
 type RedisCache struct {
+	logger  *zap.Logger
 	Client  *redis.Client
 	AppName *string
 }
 
-func New(ctx context.Context, configurations *config.Configurations) (*RedisCache, error) {
+func New(ctx context.Context, logger *zap.Logger, configurations *config.Configurations) (*RedisCache, error) {
 	opts, err := redis.ParseURL(configurations.CacheAddress)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to parse redis url: %v", err)
@@ -27,6 +29,7 @@ func New(ctx context.Context, configurations *config.Configurations) (*RedisCach
 	}
 
 	return &RedisCache{
+		logger:  logger,
 		Client:  client,
 		AppName: &configurations.AppName,
 	}, nil
@@ -35,6 +38,7 @@ func New(ctx context.Context, configurations *config.Configurations) (*RedisCach
 func (r *RedisCache) SetOne(ctx context.Context, key, value string, ttl time.Duration) error {
 	_, err := r.Client.Set(ctx, r.prefixKeyWithAppName(key), value, ttl).Result()
 	if err != nil {
+		r.logger.Error("Unable to set value in redis: ", zap.Error(err))
 		return fmt.Errorf("Error setting value in cache: %w", err)
 	}
 	return nil
@@ -43,6 +47,7 @@ func (r *RedisCache) SetOne(ctx context.Context, key, value string, ttl time.Dur
 func (r *RedisCache) GetOne(ctx context.Context, key string) (string, error) {
 	result, err := r.Client.Get(ctx, r.prefixKeyWithAppName(key)).Result()
 	if err != nil {
+		r.logger.Error("Unable to retrieve value in redis: ", zap.Error(err))
 		return "", fmt.Errorf("Error getting value from cache: %w", err)
 	}
 	return result, nil
@@ -51,6 +56,7 @@ func (r *RedisCache) GetOne(ctx context.Context, key string) (string, error) {
 func (r *RedisCache) GetAllKeysUsingWildCard(ctx context.Context, wildcard string) ([]string, error) {
 	rr, err := r.Client.Keys(ctx, wildcard).Result()
 	if err != nil {
+		r.logger.Error("Unable to retrieve wildcard value in redis: ", zap.Error(err))
 		return []string{""}, fmt.Errorf("Error getting wildcard values from cache: %w", err)
 	}
 	var results []string
@@ -63,6 +69,7 @@ func (r *RedisCache) GetAllKeysUsingWildCard(ctx context.Context, wildcard strin
 func (r *RedisCache) DeleteOne(ctx context.Context, key string) error {
 	_, err := r.Client.Del(ctx, r.prefixKeyWithAppName(key)).Result()
 	if err != nil {
+		r.logger.Error("Unable to delete value in redis: ", zap.Error(err))
 		return fmt.Errorf("Error deleting key in cache: %w", err)
 	}
 	return nil
@@ -70,6 +77,7 @@ func (r *RedisCache) DeleteOne(ctx context.Context, key string) error {
 
 func (r *RedisCache) Ping(ctx context.Context) error {
 	if err := r.Client.Ping(ctx).Err(); err != nil {
+		r.logger.Error("Unable to ping redis: ", zap.Error(err))
 		return fmt.Errorf("Failed to Ping Redis Cache: %v", err)
 	}
 	return nil

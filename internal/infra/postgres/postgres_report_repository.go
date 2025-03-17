@@ -10,18 +10,20 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/olad5/caution-companion/internal/domain"
 	"github.com/olad5/caution-companion/internal/infra"
+	"go.uber.org/zap"
 )
 
 type PostgresReportRepository struct {
+	logger     *zap.Logger
 	connection *sqlx.DB
 }
 
-func NewPostgresReportRepo(ctx context.Context, connection *sqlx.DB) (*PostgresReportRepository, error) {
+func NewPostgresReportRepo(ctx context.Context, logger *zap.Logger, connection *sqlx.DB) (*PostgresReportRepository, error) {
 	if connection == nil {
 		return &PostgresReportRepository{}, fmt.Errorf("Failed to create PostgresFileRepository: connection is nil")
 	}
 
-	return &PostgresReportRepository{connection: connection}, nil
+	return &PostgresReportRepository{logger: logger, connection: connection}, nil
 }
 
 func (p *PostgresReportRepository) CreateReport(ctx context.Context, report domain.Report) error {
@@ -34,6 +36,7 @@ func (p *PostgresReportRepository) CreateReport(ctx context.Context, report doma
 
 	_, err := p.connection.NamedExec(query, toSqlxReport(report))
 	if err != nil {
+		p.logger.Error("Error creating report in the db: ", zap.Error(err))
 		return fmt.Errorf("error creating report in the db: %w", err)
 	}
 	return nil
@@ -50,9 +53,7 @@ func (p *PostgresReportRepository) GetReportsByUserId(ctx context.Context, userI
 
 	err := p.connection.Select(&reports, query, userId)
 	if err != nil {
-		if errors.Is(err, ErrRecordNotFound) {
-			return []domain.Report{}, infra.ErrReportNotFound
-		}
+		p.logger.Error("Error getting reports by userId: ", zap.Error(err))
 		return []domain.Report{}, fmt.Errorf("error getting reports by userId: %w", err)
 	}
 
@@ -76,9 +77,7 @@ func (p *PostgresReportRepository) GetLatestReports(ctx context.Context, pageNum
 
 	err := p.connection.Select(&reports, query)
 	if err != nil {
-		if errors.Is(err, ErrRecordNotFound) {
-			return []domain.Report{}, infra.ErrReportNotFound
-		}
+		p.logger.Error("Error getting latest reports: ", zap.Error(err))
 		return []domain.Report{}, fmt.Errorf("error getting latest reports: %w", err)
 	}
 
@@ -98,6 +97,7 @@ func (p *PostgresReportRepository) GetReportByReportId(ctx context.Context, repo
 		if errors.Is(err, ErrRecordNotFound) {
 			return domain.Report{}, infra.ErrReportNotFound
 		}
+		p.logger.Error("Error getting report by reportId: ", zap.Error(err))
 		return domain.Report{}, fmt.Errorf("error getting report by reportId: %w", err)
 	}
 	return toReport(report), nil
@@ -112,6 +112,7 @@ func (p *PostgresReportRepository) Count(ctx context.Context) (int, error) {
 
 	var count int
 	if err := p.connection.Get(&count, q); err != nil {
+		p.logger.Error("Error reports count: ", zap.Error(err))
 		return 0, fmt.Errorf("failed to get the count from the postgres database: %w", err)
 	}
 	return count, nil
@@ -119,6 +120,7 @@ func (p *PostgresReportRepository) Count(ctx context.Context) (int, error) {
 
 func (p *PostgresReportRepository) Ping(ctx context.Context) error {
 	if err := p.connection.Ping(); err != nil {
+		p.logger.Error("Error pinging PostgresReportRepository: ", zap.Error(err))
 		return fmt.Errorf("failed to ping postgres database: %w", err)
 	}
 	return nil
